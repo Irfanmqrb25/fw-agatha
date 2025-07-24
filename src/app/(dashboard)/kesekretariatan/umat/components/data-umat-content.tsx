@@ -1,18 +1,30 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
-import { useState, useEffect } from "react"
-import { FamilyHeadFormDialog } from "./family-head-form-dialog"
-import { FamilyHeadsTable } from "./family-heads-table"
-import { ImportDialog } from "./import-dialog"
-import { FamilyHead, FamilyHeadWithDetails, FamilyHeadFormValues } from "../types"
-import { toast } from "sonner"
-import { useAuth } from "@/contexts/auth-context"
-import { useRouter } from "next/navigation"
-import { AlertCircle, PlusIcon } from "lucide-react"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { exportFamilyHeadTemplate } from "../utils/export-template"
-import { addFamilyHead, getAllFamilyHeadsWithDetails, markFamilyAsDeceased, markFamilyAsMoved, markFamilyMemberAsDeceased, updateFamilyHead, permanentDeleteFamilyHead } from "../actions"
+import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import { FamilyHeadFormDialog } from "./family-head-form-dialog";
+import { FamilyHeadsTable } from "./family-heads-table";
+import { ImportDialog } from "./import-dialog";
+import {
+  FamilyHead,
+  FamilyHeadWithDetails,
+  FamilyHeadFormValues,
+} from "../types";
+import { toast } from "sonner";
+import { useAuth } from "@/contexts/auth-context";
+import { useRouter } from "next/navigation";
+import { AlertCircle, PlusIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { exportFamilyHeadTemplate } from "../utils/export-template";
+import {
+  addFamilyHead,
+  getAllFamilyHeadsWithDetails,
+  markFamilyAsDeceased,
+  markFamilyAsMoved,
+  markFamilyMemberAsDeceased,
+  updateFamilyHead,
+  permanentDeleteFamilyHead,
+} from "../actions";
 
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 // import { Badge } from "@/components/ui/badge"
@@ -23,7 +35,7 @@ import { addFamilyHead, getAllFamilyHeadsWithDetails, markFamilyAsDeceased, mark
 // import { previewInactiveUmatData } from "../actions"
 
 interface DataUmatContentProps {
-    initialFamilyHeads?: FamilyHeadWithDetails[];
+  initialFamilyHeads?: FamilyHeadWithDetails[];
 }
 
 // Komponen untuk monitoring cronjob penghapusan otomatis
@@ -55,7 +67,7 @@ interface DataUmatContentProps {
 //                     <CardTitle>Monitor Cronjob Penghapusan Otomatis</CardTitle>
 //                 </div>
 //                 <CardDescription>
-//                     Sistem akan menghapus otomatis data umat dengan status 'Pindah' atau 'Meninggal (Seluruh Keluarga)' 
+//                     Sistem akan menghapus otomatis data umat dengan status 'Pindah' atau 'Meninggal (Seluruh Keluarga)'
 //                     setiap tanggal 1 jam 01:00 WIB. Data yang dihapus adalah yang diperbarui pada bulan sebelumnya.
 //                 </CardDescription>
 //             </CardHeader>
@@ -119,7 +131,7 @@ interface DataUmatContentProps {
 //                     <div className="space-y-3">
 //                         <Separator />
 //                         <h4 className="font-medium">Detail Data yang Akan Dihapus:</h4>
-                        
+
 //                         {preview.movedFamilies.length > 0 && (
 //                             <div>
 //                                 <div className="space-y-1">
@@ -169,264 +181,299 @@ interface DataUmatContentProps {
 //     );
 // }
 
-export default function DataUmatContent({ initialFamilyHeads = [] }: DataUmatContentProps) {
-    const { userRole } = useAuth()
-    const router = useRouter()
-    const [searchQuery, setSearchQuery] = useState("")
-    const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
-    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
-    const [selectedFamilyHead, setSelectedFamilyHead] = useState<FamilyHeadWithDetails | undefined>()
-    const [familyHeads, setFamilyHeads] = useState<FamilyHeadWithDetails[]>(initialFamilyHeads)
-    const [isLoading, setIsLoading] = useState(initialFamilyHeads.length === 0)
+export default function DataUmatContent({
+  initialFamilyHeads = [],
+}: DataUmatContentProps) {
+  const { userRole } = useAuth();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [selectedFamilyHead, setSelectedFamilyHead] = useState<
+    FamilyHeadWithDetails | undefined
+  >();
+  const [familyHeads, setFamilyHeads] =
+    useState<FamilyHeadWithDetails[]>(initialFamilyHeads);
+  const [isLoading, setIsLoading] = useState(initialFamilyHeads.length === 0);
 
-    // Cek apakah pengguna memiliki hak akses
-    const hasAccess = userRole ? [
-        'SUPER_USER',
-        'KETUA',
-        'WAKIL_KETUA',
-        'SEKRETARIS',
-        'WAKIL_SEKRETARIS',
-    ].includes(userRole) : false;
+  // Cek apakah pengguna memiliki hak akses
+  const hasAccess = userRole
+    ? [
+        "SUPER_USER",
+        "KETUA",
+        "WAKIL_KETUA",
+        "SEKRETARIS",
+        "WAKIL_SEKRETARIS",
+      ].includes(userRole)
+    : false;
 
-    // Redirect jika tidak memiliki akses
-    useEffect(() => {
-        if (userRole && !hasAccess) {
-            toast.error("Anda tidak memiliki akses ke halaman ini")
-            router.push("/dashboard")
-        }
-    }, [hasAccess, router, userRole])
+  // Redirect jika tidak memiliki akses
+  useEffect(() => {
+    if (userRole && !hasAccess) {
+      toast.error("Anda tidak memiliki akses ke halaman ini");
+      router.push("/dashboard");
+    }
+  }, [hasAccess, router, userRole]);
 
-    // Cek akses untuk edit dan hapus data
-    const canModifyData = userRole ? [
-        'SUPER_USER',
-        'SEKRETARIS',
-        'WAKIL_SEKRETARIS',
-    ].includes(userRole) : false;
+  // Cek akses untuk edit dan hapus data
+  const canModifyData = userRole
+    ? ["SUPER_USER", "SEKRETARIS", "WAKIL_SEKRETARIS"].includes(userRole)
+    : false;
 
-    // Fetch data keluarga umat
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                setIsLoading(true)
-                const data = await getAllFamilyHeadsWithDetails();
-                setFamilyHeads(data);
-            } catch (error) {
-                console.error("Error fetching family heads:", error);
-                toast.error("Gagal mengambil data keluarga umat");
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
-        // Hanya fetch data jika tidak ada initial data
-        if (initialFamilyHeads.length === 0) {
-            fetchData();
-        }
-    }, [initialFamilyHeads.length]);
-
-    const handleAddFamilyHead = async (values: FamilyHeadFormValues) => {
-        if (!canModifyData) {
-            toast.error("Anda tidak memiliki izin untuk menambah data")
-            return
-        }
-
-        try {
-            // Konversi tanggal dari null ke undefined
-            const formattedValues = {
-                ...values,
-                nomorTelepon: values.nomorTelepon || undefined,
-                tanggalKeluar: values.tanggalKeluar === null ? undefined : values.tanggalKeluar,
-                tanggalMeninggal: values.tanggalMeninggal === null ? undefined : values.tanggalMeninggal
-            };
-
-            await addFamilyHead(formattedValues);
-            
-            // Refresh data
-            const data = await getAllFamilyHeadsWithDetails();
-            setFamilyHeads(data);
-            toast.success("Berhasil menambahkan data keluarga baru");
-            setIsFormDialogOpen(false);
-        } catch (error) {
-            console.error("Error adding family head:", error);
-            toast.error("Gagal menambahkan data keluarga");
-        }
+  // Fetch data keluarga umat
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        const data = await getAllFamilyHeadsWithDetails();
+        setFamilyHeads(data);
+      } catch (error) {
+        console.error("Error fetching family heads:", error);
+        toast.error("Gagal mengambil data keluarga umat");
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    const handleEditFamilyHead = async (values: FamilyHeadFormValues) => {
-        if (!selectedFamilyHead || !canModifyData) {
-            if (!canModifyData) toast.error("Anda tidak memiliki izin untuk mengubah data")
-            return
-        }
+    // Hanya fetch data jika tidak ada initial data
+    if (initialFamilyHeads.length === 0) {
+      fetchData();
+    }
+  }, [initialFamilyHeads.length]);
 
-        try {
-            // Konversi tanggal dari null ke undefined
-            const formattedValues = {
-                ...values,
-                nomorTelepon: values.nomorTelepon || undefined,
-                tanggalKeluar: values.tanggalKeluar === null ? undefined : values.tanggalKeluar,
-                tanggalMeninggal: values.tanggalMeninggal === null ? undefined : values.tanggalMeninggal
-            };
-
-            await updateFamilyHead(selectedFamilyHead.id, formattedValues);
-            
-            // Refresh data
-            const data = await getAllFamilyHeadsWithDetails();
-            setFamilyHeads(data);
-            toast.success("Berhasil mengupdate data keluarga");
-            setIsFormDialogOpen(false);
-        } catch (error) {
-            console.error("Error updating family head:", error);
-            toast.error("Gagal mengupdate data keluarga");
-        }
+  const handleAddFamilyHead = async (values: FamilyHeadFormValues) => {
+    if (!canModifyData) {
+      toast.error("Anda tidak memiliki izin untuk menambah data");
+      return;
     }
 
-    const handleDeleteFamilyHead = async (id: string, reason: "moved" | "deceased" | "member_deceased", memberName?: string) => {
-        if (!canModifyData) {
-            toast.error("Anda tidak memiliki izin untuk menghapus data")
-            return
-        }
+    try {
+      // Konversi tanggal dari null ke undefined
+      const formattedValues = {
+        ...values,
+        nomorTelepon: values.nomorTelepon || undefined,
+        tanggalKeluar:
+          values.tanggalKeluar === null ? undefined : values.tanggalKeluar,
+        tanggalMeninggal:
+          values.tanggalMeninggal === null
+            ? undefined
+            : values.tanggalMeninggal,
+      };
 
-        try {
-            if (reason === "moved") {
-                await markFamilyAsMoved(id);
-                toast.success("Status keluarga berhasil diubah menjadi Pindah");
-            } else if (reason === "deceased") {
-                await markFamilyAsDeceased(id);
-                toast.success("Status keluarga berhasil diubah menjadi Meninggal");
-            } else if (reason === "member_deceased" && memberName) {
-                await markFamilyMemberAsDeceased(id, memberName);
-                toast.success(`Status ${memberName} berhasil diubah menjadi Meninggal`);
-            }
-            
-            // Refresh data
-            const data = await getAllFamilyHeadsWithDetails();
-            setFamilyHeads(data);
-        } catch (error) {
-            console.error("Error deleting family head:", error);
-            toast.error("Gagal memperbarui status keluarga");
-        }
+      await addFamilyHead(formattedValues);
+
+      // Refresh data
+      const data = await getAllFamilyHeadsWithDetails();
+      setFamilyHeads(data);
+      toast.success("Berhasil menambahkan data keluarga baru");
+      setIsFormDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding family head:", error);
+      toast.error("Gagal menambahkan data keluarga");
+    }
+  };
+
+  const handleEditFamilyHead = async (values: FamilyHeadFormValues) => {
+    if (!selectedFamilyHead || !canModifyData) {
+      if (!canModifyData)
+        toast.error("Anda tidak memiliki izin untuk mengubah data");
+      return;
     }
 
-    const handlePermanentDeleteFamilyHead = async (id: string) => {
-        // Only SUPER_USER can perform permanent delete
-        if (userRole !== 'SUPER_USER') {
-            toast.error("Anda tidak memiliki izin untuk menghapus data secara permanen")
-            return
-        }
+    try {
+      // Konversi tanggal dari null ke undefined
+      const formattedValues = {
+        ...values,
+        nomorTelepon: values.nomorTelepon || undefined,
+        tanggalKeluar:
+          values.tanggalKeluar === null ? undefined : values.tanggalKeluar,
+        tanggalMeninggal:
+          values.tanggalMeninggal === null
+            ? undefined
+            : values.tanggalMeninggal,
+      };
 
-        try {
-            await permanentDeleteFamilyHead(id);
-            
-            // Refresh data
-            const data = await getAllFamilyHeadsWithDetails();
-            setFamilyHeads(data);
-            toast.success("Data keluarga berhasil dihapus secara permanen dari sistem");
-        } catch (error) {
-            console.error("Error permanently deleting family head:", error);
-            toast.error("Gagal menghapus data keluarga secara permanen");
-        }
+      await updateFamilyHead(selectedFamilyHead.id, formattedValues);
+
+      // Refresh data
+      const data = await getAllFamilyHeadsWithDetails();
+      setFamilyHeads(data);
+      toast.success("Berhasil mengupdate data keluarga");
+      setIsFormDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating family head:", error);
+      toast.error("Gagal mengupdate data keluarga");
+    }
+  };
+
+  const handleDeleteFamilyHead = async (
+    id: string,
+    reason: "moved" | "deceased" | "member_deceased",
+    memberName?: string
+  ) => {
+    if (!canModifyData) {
+      toast.error("Anda tidak memiliki izin untuk menghapus data");
+      return;
     }
 
-    const handleDownloadTemplate = () => {
-        if (!canModifyData) {
-            toast.error("Anda tidak memiliki izin untuk mengunduh template")
-            return
-        }
+    try {
+      if (reason === "moved") {
+        await markFamilyAsMoved(id);
+        toast.success("Status keluarga berhasil diubah menjadi Pindah");
+      } else if (reason === "deceased") {
+        await markFamilyAsDeceased(id);
+        toast.success("Status keluarga berhasil diubah menjadi Meninggal");
+      } else if (reason === "member_deceased" && memberName) {
+        await markFamilyMemberAsDeceased(id, memberName);
+        toast.success(`Status ${memberName} berhasil diubah menjadi Meninggal`);
+      }
 
-        exportFamilyHeadTemplate();
+      // Refresh data
+      const data = await getAllFamilyHeadsWithDetails();
+      setFamilyHeads(data);
+    } catch (error) {
+      console.error("Error deleting family head:", error);
+      toast.error("Gagal memperbarui status keluarga");
+    }
+  };
+
+  const handlePermanentDeleteFamilyHead = async (id: string) => {
+    // Only SUPER_USER can perform permanent delete
+    if (userRole !== "SUPER_USER") {
+      toast.error(
+        "Anda tidak memiliki izin untuk menghapus data secara permanen"
+      );
+      return;
     }
 
-    const handleImportData = () => {
-        if (!canModifyData) {
-            toast.error("Anda tidak memiliki izin untuk mengimpor data")
-            return
-        }
+    try {
+      await permanentDeleteFamilyHead(id);
 
-        setIsImportDialogOpen(true);
+      // Refresh data
+      const data = await getAllFamilyHeadsWithDetails();
+      setFamilyHeads(data);
+      toast.success(
+        "Data keluarga berhasil dihapus secara permanen dari sistem"
+      );
+    } catch (error) {
+      console.error("Error permanently deleting family head:", error);
+      toast.error("Gagal menghapus data keluarga secara permanen");
+    }
+  };
+
+  const handleDownloadTemplate = () => {
+    if (!canModifyData) {
+      toast.error("Anda tidak memiliki izin untuk mengunduh template");
+      return;
     }
 
-    const handleImportComplete = async (newFamilyHeads: FamilyHead[]) => {
-        // Refresh data setelah import
-        try {
-            const data = await getAllFamilyHeadsWithDetails();
-            setFamilyHeads(data);
-            toast.success(`Berhasil mengimpor ${newFamilyHeads.length} data keluarga`);
-        } catch (error) {
-            console.error("Error refreshing data after import:", error);
-        }
-    };
+    exportFamilyHeadTemplate();
+  };
 
-    if (userRole === undefined) {
-        return <div className="flex justify-center items-center h-64">Memeriksa akses...</div>
+  const handleImportData = () => {
+    if (!canModifyData) {
+      toast.error("Anda tidak memiliki izin untuk mengimpor data");
+      return;
     }
 
-    if (!hasAccess && userRole !== null) {
-        return <div className="flex justify-center items-center h-64">Anda tidak memiliki akses ke halaman ini</div>
-    }
+    setIsImportDialogOpen(true);
+  };
 
+  const handleImportComplete = async (newFamilyHeads: FamilyHead[]) => {
+    // Refresh data setelah import
+    try {
+      const data = await getAllFamilyHeadsWithDetails();
+      setFamilyHeads(data);
+      toast.success(
+        `Berhasil mengimpor ${newFamilyHeads.length} data keluarga`
+      );
+    } catch (error) {
+      console.error("Error refreshing data after import:", error);
+    }
+  };
+
+  if (userRole === undefined) {
     return (
-        <div className="space-y-6">
-            {/* Monitor Cronjob - hanya untuk SUPER_USER */}
-            {/* {userRole === 'SUPER_USER' && <AutoDeleteMonitor />} */}
+      <div className="flex justify-center items-center h-64">
+        Memeriksa akses...
+      </div>
+    );
+  }
 
-            {!canModifyData && (
-                <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Mode Hanya Baca</AlertTitle>
-                    <AlertDescription>
-                        Anda hanya dapat melihat data umat. Untuk menambah, mengubah, atau menghapus data, hubungi Sekretaris atau Wakil Sekretaris.
-                    </AlertDescription>
-                </Alert>
-            )}
+  if (!hasAccess && userRole !== null) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        Anda tidak memiliki akses ke halaman ini
+      </div>
+    );
+  }
 
-            <h2 className="text-2xl font-bold">Data Umat</h2>
-            <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-4 mb-2">
-                {canModifyData && (
-                    <Button
-                        onClick={() => {
-                            setSelectedFamilyHead(undefined)
-                            setIsFormDialogOpen(true)
-                        }}
-                        size="sm"
-                        className="w-full sm:w-auto"
-                    >
-                        <PlusIcon className="mr-2 h-4 w-4" />
-                        Tambah Data
-                    </Button>
-                )}
-            </div>
+  return (
+    <div className="space-y-6">
+      {/* Monitor Cronjob - hanya untuk SUPER_USER */}
+      {/* {userRole === 'SUPER_USER' && <AutoDeleteMonitor />} */}
 
-            <FamilyHeadsTable
-                familyHeads={familyHeads}
-                isLoading={isLoading}
-                onEdit={(familyHead) => {
-                    if (!canModifyData) {
-                        toast.error("Anda tidak memiliki izin untuk mengubah data")
-                        return
-                    }
-                    setSelectedFamilyHead(familyHead)
-                    setIsFormDialogOpen(true)
-                }}
-                onDelete={handleDeleteFamilyHead}
-                onPermanentDelete={handlePermanentDeleteFamilyHead}
-                onExportTemplate={handleDownloadTemplate}
-                onImportData={handleImportData}
-                canModifyData={canModifyData}
-            />
+      {!canModifyData && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Mode Hanya Baca</AlertTitle>
+          <AlertDescription>
+            Anda hanya dapat melihat data umat. Untuk menambah, mengubah, atau
+            menghapus data, hubungi Sekretaris atau Wakil Sekretaris.
+          </AlertDescription>
+        </Alert>
+      )}
 
-            <FamilyHeadFormDialog
-                open={isFormDialogOpen}
-                onOpenChange={setIsFormDialogOpen}
-                familyHead={selectedFamilyHead}
-                onSubmit={selectedFamilyHead ? handleEditFamilyHead : handleAddFamilyHead}
-            />
+      <h2 className="text-2xl font-bold">Data Umat</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-center w-full gap-4 mb-2">
+        {canModifyData && (
+          <Button
+            onClick={() => {
+              setSelectedFamilyHead(undefined);
+              setIsFormDialogOpen(true);
+            }}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <PlusIcon className="mr-2 h-4 w-4" />
+            Tambah Data
+          </Button>
+        )}
+      </div>
 
-            <ImportDialog
-                open={isImportDialogOpen}
-                onOpenChange={setIsImportDialogOpen}
-                onImportComplete={handleImportComplete}
-                existingDataCount={familyHeads.length}
-            />
-        </div>
-    )
+      <FamilyHeadsTable
+        familyHeads={familyHeads}
+        isLoading={isLoading}
+        onEdit={(familyHead) => {
+          if (!canModifyData) {
+            toast.error("Anda tidak memiliki izin untuk mengubah data");
+            return;
+          }
+          setSelectedFamilyHead(familyHead);
+          setIsFormDialogOpen(true);
+        }}
+        onDelete={handleDeleteFamilyHead}
+        onPermanentDelete={handlePermanentDeleteFamilyHead}
+        onExportTemplate={handleDownloadTemplate}
+        onImportData={handleImportData}
+        canModifyData={canModifyData}
+      />
+
+      <FamilyHeadFormDialog
+        open={isFormDialogOpen}
+        onOpenChange={setIsFormDialogOpen}
+        familyHead={selectedFamilyHead}
+        onSubmit={
+          selectedFamilyHead ? handleEditFamilyHead : handleAddFamilyHead
+        }
+      />
+
+      <ImportDialog
+        open={isImportDialogOpen}
+        onOpenChange={setIsImportDialogOpen}
+        onImportComplete={handleImportComplete}
+        existingDataCount={familyHeads.length}
+      />
+    </div>
+  );
 }
