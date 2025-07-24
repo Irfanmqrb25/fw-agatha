@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk manajemen user dan autentikasi
+model User {
+  id            String         @id @default(uuid())
+  username      String         @unique
+  password      String
+  passphrase    String
+  role          Role           @default(UMAT)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  keluarga      KeluargaUmat?  @relation(fields: [keluargaId], references: [id])
+  keluargaId    String?
+  notifications Notification[]
+  pengajuan     Pengajuan[]
+  publikasi     Publikasi[]
+}
+
+enum Role {
+  SUPER_USER
+  KETUA
+  WAKIL_KETUA
+  BENDAHARA
+  WAKIL_BENDAHARA
+  SEKRETARIS
+  WAKIL_SEKRETARIS
+  UMAT
+}
+
+// Model untuk data keluarga umat
+model KeluargaUmat {
+  id                       String           @id @default(uuid())
+  namaKepalaKeluarga       String           @unique
+  tanggalBergabung         DateTime
+  tanggalKeluar            DateTime?
+  alamat                   String
+  jumlahAnakTertanggung    Int
+  jumlahKerabatTertanggung Int
+  jumlahAnggotaKeluarga    Int
+  tempatLahir              String?
+  tanggalLahir             DateTime?
+  nomorTelepon             String?
+  status                   StatusKehidupan  @default(HIDUP)
+  kotaDomisili             String?
+  pendidikanTerakhir       String?
+  tanggalBaptis            DateTime?
+  tanggalKrisma            DateTime?
+  tanggalMeninggal         DateTime?
+  statusPernikahan         StatusPernikahan @default(TIDAK_MENIKAH)
+  pasangan                 Pasangan?
+  tanggungan               Tanggungan[]
+  users                    User[]
+  doaLingkungan            DoaLingkungan[]  @relation("TuanRumah")
+  absensiDoling            AbsensiDoling[]
+  danaMandiri              DanaMandiri[]
+  iurataIkata              IuranIkata[]
+  sumbangan                KasLingkungan[]
+}
+
+enum StatusKehidupan {
+  HIDUP
+  PINDAH
+  MENINGGAL
+}
+
+enum StatusPernikahan {
+  MENIKAH
+  TIDAK_MENIKAH
+  CERAI_HIDUP
+  CERAI_MATI
+}
+
+// Model untuk data pasangan
+model Pasangan {
+  id                 String          @id @default(uuid())
+  nama               String
+  tempatLahir        String
+  tanggalLahir       DateTime
+  nomorTelepon       String?
+  pendidikanTerakhir String
+  agama              Agama
+  noBiduk            String?
+  tanggalBaptis      DateTime?
+  tanggalKrisma      DateTime?
+  status             StatusKehidupan @default(HIDUP)
+  tanggalMeninggal   DateTime?
+  keluarga           KeluargaUmat    @relation(fields: [keluargaId], references: [id])
+  keluargaId         String          @unique
+}
+
+// Model untuk data tanggungan (anak/kerabat)
+model Tanggungan {
+  id                 String           @id @default(uuid())
+  jenisTanggungan    JenisTanggungan
+  nama               String
+  tanggalLahir       DateTime
+  tempatLahir        String
+  pendidikanTerakhir String
+  agama              Agama
+  tanggalBaptis      DateTime?
+  tanggalKrisma      DateTime?
+  statusPernikahan   StatusPernikahan @default(TIDAK_MENIKAH)
+  status             StatusKehidupan  @default(HIDUP)
+  tanggalMeninggal   DateTime?
+  keluarga           KeluargaUmat     @relation(fields: [keluargaId], references: [id])
+  keluargaId         String
+}
+
+enum JenisTanggungan {
+  ANAK
+  KERABAT
+}
+
+enum Agama {
+  KATOLIK
+  ISLAM
+  KRISTEN
+  HINDU
+  BUDHA
+}
+
+// Model untuk manajemen keuangan lingkungan
+model KasLingkungan {
+  id             String                  @id @default(uuid())
+  tanggal        DateTime
+  jenisTranasksi JenisTransaksi
+  tipeTransaksi  TipeTransaksiLingkungan
+  keterangan     String?
+  debit          Float                   @default(0)
+  kredit         Float                   @default(0)
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  approval       Approval?
+  keluarga       KeluargaUmat?           @relation(fields: [keluargaId], references: [id])
+  keluargaId     String?
+}
+
+enum JenisTransaksi {
+  UANG_MASUK
+  UANG_KELUAR
+}
+
+enum TipeTransaksiLingkungan {
+  KOLEKTE_I
+  KOLEKTE_II
+  SUMBANGAN_UMAT
+  PENERIMAAN_LAIN
+  BIAYA_OPERASIONAL
+  PENYELENGGARAAN_KEGIATAN
+  PEMBELIAN
+  SOSIAL_DUKA
+  TRANSFER_DANA_KE_IKATA
+  LAIN_LAIN
+}
+
+// Model untuk manajemen dana mandiri
+model DanaMandiri {
+  id                String       @id @default(uuid())
+  tanggal           DateTime
+  keluarga          KeluargaUmat @relation(fields: [keluargaId], references: [id])
+  keluargaId        String
+  jumlahDibayar     Float
+  statusSetor       Boolean      @default(false)
+  tanggalSetor      DateTime?
+  tahun             Int
+  bulan             Int
+  statusPembayaran  String?      // "lunas", "sebagian_bulan", "belum_ada_pembayaran"
+  periodeBayar      Int?         // Bulan yang dibayar (1-12)
+  totalIuran        Float?       // Total iuran yang seharusnya dibayar
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+}
+
+// Model untuk pengaturan dana mandiri
+model DanaMandiriSetting {
+  id           String   @id @default(uuid())
+  tahun        Int      @unique
+  jumlahIuran  Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Model untuk tunggakan dana mandiri
+model DanaMandiriArrears {
+  id                String   @id @default(uuid())
+  keluargaId        String   @unique
+  namaKepalaKeluarga String
+  alamat            String?
+  nomorTelepon      String?
+  tahunTertunggak   Int[]    @default([])
+  totalTunggakan    Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+// Model untuk manajemen IKATA
+model KasIkata {
+  id             String             @id @default(uuid())
+  tanggal        DateTime
+  jenisTranasksi JenisTransaksi
+  tipeTransaksi  TipeTransaksiIkata
+  keterangan     String?
+  debit          Float              @default(0)
+  kredit         Float              @default(0)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  locked         Boolean            @default(false)
+}
+
+// Model untuk saldo awal IKATA
+model SaldoAwalIkata {
+  id          String   @id @default(uuid())
+  tahun       Int
+  bulan       Int
+  saldoAwal   Float    @default(0)
+  keterangan  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String?
+  updatedBy   String?
+
+  @@unique([tahun, bulan])
+}
+
+enum TipeTransaksiIkata {
+  IURAN_ANGGOTA
+  TRANSFER_DANA_DARI_LINGKUNGAN
+  SUMBANGAN_ANGGOTA
+  PENERIMAAN_LAIN
+  UANG_DUKA_PAPAN_BUNGA
+  KUNJUNGAN_KASIH
+  CINDERAMATA_KELAHIRAN
+  CINDERAMATA_PERNIKAHAN
+  UANG_AKOMODASI
+  PEMBELIAN
+  LAIN_LAIN
+}
+
+// Model untuk iuran IKATA
+model IuranIkata {
+  id            String       @id @default(uuid())
+  keluarga      KeluargaUmat @relation(fields: [keluargaId], references: [id])
+  keluargaId    String
+  status        StatusIuran
+  bulanAwal     Int?
+  bulanAkhir    Int?
+  tahun         Int
+  jumlahDibayar Float
+  totalIuran    Float        @default(0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+// Model untuk pengaturan iuran IKATA
+model IkataSetting {
+  id           String   @id @default(uuid())
+  tahun        Int      @unique
+  jumlahIuran  Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// Model untuk tunggakan IKATA
+model IkataArrears {
+  id                String   @id @default(uuid())
+  keluargaId        String   @unique
+  namaKepalaKeluarga String
+  alamat            String?
+  nomorTelepon      String?
+  tahunTertunggak   Int[]    @default([])
+  totalTunggakan    Float    @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum StatusIuran {
+  LUNAS
+  SEBAGIAN_BULAN
+  BELUM_BAYAR
+}
+
+// Model untuk doa lingkungan
+model DoaLingkungan {
+  id              String          @id @default(uuid())
+  tanggal         DateTime
+  jenisIbadat     JenisIbadat
+  subIbadat       SubIbadat?
+  customSubIbadat String?         // Field baru untuk sub ibadat yang diinput manual
+  temaIbadat      String?
+  tuanRumah       KeluargaUmat    @relation("TuanRumah", fields: [tuanRumahId], references: [id])
+  tuanRumahId     String
+  jumlahKKHadir   Int             @default(0)
+  bapak           Int             @default(0)
+  ibu             Int             @default(0)
+  omk             Int             @default(0)
+  bir             Int             @default(0)
+  biaBawah        Int             @default(0)
+  biaAtas         Int             @default(0)
+  kolekteI        Float           @default(0)
+  kolekteII       Float           @default(0)
+  ucapanSyukur    Float           @default(0)
+  pemimpinIbadat  String?
+  pemimpinRosario String?
+  pembawaRenungan String?
+  pembawaLagu     String?
+  doaUmat         String?
+  bacaan          String?         // Menambahkan field bacaan
+  pemimpinMisa    String?
+  bacaanI         String?
+  pemazmur        String?
+  jumlahPeserta   Int             @default(0)
+  statusKegiatan  StatusKegiatan  @default(BELUM_SELESAI)
+  absensi         AbsensiDoling[]
+  approval        Approval?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+enum JenisIbadat {
+  DOA_LINGKUNGAN
+  MISA
+  PERTEMUAN
+  BAKTI_SOSIAL
+  KEGIATAN_LAIN
+}
+
+enum SubIbadat {
+  IBADAT_SABDA
+  IBADAT_SABDA_TEMATIK
+  PRAPASKAH
+  BKSN
+  BULAN_ROSARIO
+  NOVENA_NATAL
+  MISA_SYUKUR
+  MISA_REQUEM
+  MISA_ARWAH
+  MISA_PELINDUNG
+}
+
+// Model untuk absensi doa lingkungan
+model AbsensiDoling {
+  id              String        @id @default(uuid())
+  doaLingkungan   DoaLingkungan @relation(fields: [doaLingkunganId], references: [id])
+  doaLingkunganId String
+  keluarga        KeluargaUmat  @relation(fields: [keluargaId], references: [id])
+  keluargaId      String
+  hadir           Boolean       @default(false)
+  statusKehadiran String?       // Enum: TIDAK_HADIR, SUAMI_SAJA, ISTRI_SAJA, SUAMI_ISTRI_HADIR
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+// Model untuk approval
+model Approval {
+  id              String         @id @default(uuid())
+  kasLingkungan   KasLingkungan? @relation(fields: [kasLingkunganId], references: [id])
+  kasLingkunganId String?        @unique
+  doaLingkungan   DoaLingkungan? @relation(fields: [doaLingkunganId], references: [id])
+  doaLingkunganId String?        @unique
+  status          StatusApproval @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+}
+
+enum StatusApproval {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// Model untuk pengajuan agenda
+model Pengajuan {
+  id              String          @id @default(uuid())
+  tanggal         DateTime
+  perihal         String
+  tujuan          TujuanPengajuan
+  status          StatusPengajuan @default(OPEN)
+  tindakLanjut    TindakLanjut?
+  updateStatus    UpdateStatus?
+  hasilAkhir      HasilAkhir?
+  alasanPenolakan String?
+  pengaju         User            @relation(fields: [pengajuId], references: [id])
+  pengajuId       String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+enum TujuanPengajuan {
+  DPL
+  STASI
+  PAROKI
+}
+
+enum StatusPengajuan {
+  OPEN
+  CLOSED
+}
+
+enum TindakLanjut {
+  DIPROSES_DI_LINGKUNGAN
+  DIPROSES_DI_STASI
+  DIPROSES_DI_PAROKI
+  DITOLAK
+}
+
+enum UpdateStatus {
+  DITERUSKAN_KE_PAROKI
+  SELESAI
+  DITOLAK
+}
+
+enum HasilAkhir {
+  SELESAI
+  DITOLAK
+}
+
+// Model untuk publikasi/pengumuman
+model Publikasi {
+  id             String               @id @default(uuid())
+  judul          String
+  isi            String
+  lampiran       String[]
+  klasifikasi    KlasifikasiPublikasi
+  deadline       DateTime?
+  targetPenerima Role[]
+  pembuat        User                 @relation(fields: [pembuatId], references: [id])
+  pembuatId      String
+  locked         Boolean              @default(false)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  laporan        LaporanPublikasi[]
+}
+
+enum KlasifikasiPublikasi {
+  PENTING
+  UMUM
+  RAHASIA
+  SEGERA
+}
+
+// Model untuk laporan publikasi
+model LaporanPublikasi {
+  id           String    @id @default(uuid())
+  jenis        String
+  keterangan   String
+  publikasi    Publikasi @relation(fields: [publikasiId], references: [id], onDelete: Cascade)
+  publikasiId  String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// Model untuk notifikasi
+model Notification {
+  id        String   @id @default(uuid())
+  pesan     String
+  dibaca    Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum StatusKegiatan {
+  BELUM_SELESAI
+  SELESAI
+  DIBATALKAN
+}

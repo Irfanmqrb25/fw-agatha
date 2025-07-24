@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "IuranIkata" ADD COLUMN     "totalIuran" DOUBLE PRECISION NOT NULL DEFAULT 120000;
