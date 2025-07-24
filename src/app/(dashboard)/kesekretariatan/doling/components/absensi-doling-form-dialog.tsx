@@ -1,46 +1,67 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { AbsensiDoling, DetilDoling, JadwalDoling } from "../types"
-import { toast } from "sonner"
-import { useState, useEffect, useMemo, useCallback } from "react"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
-import { Combobox, ComboboxOption } from "@/components/ui/combobox"
-import { Check, ChevronsUpDown, SearchIcon } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { KeluargaForSelect } from "../actions"
+} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AbsensiDoling, DetilDoling, JadwalDoling } from "../types";
+import { toast } from "sonner";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { Combobox, ComboboxOption } from "@/components/ui/combobox";
+import { Check, ChevronsUpDown, SearchIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { KeluargaForSelect } from "../actions";
 
 interface AbsensiDolingFormDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  absensi?: AbsensiDoling
-  onSubmit: (values: { doaLingkunganId: string, absensiData: { keluargaId: string, hadir: boolean, statusKehadiran: string }[] }) => void
-  detilDoling?: DetilDoling[]
-  jadwalDoling?: JadwalDoling[]
-  keluargaList?: KeluargaForSelect[]
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  absensi?: AbsensiDoling;
+  onSubmit: (values: {
+    doaLingkunganId: string;
+    absensiData: {
+      keluargaId: string;
+      hadir: boolean;
+      statusKehadiran: string;
+    }[];
+  }) => void;
+  detilDoling?: DetilDoling[];
+  jadwalDoling?: JadwalDoling[];
+  keluargaList?: KeluargaForSelect[];
 }
 
-export type StatusKehadiran = "TIDAK_HADIR" | "SUAMI_SAJA" | "ISTRI_SAJA" | "SUAMI_ISTRI_HADIR";
+export type StatusKehadiran =
+  | "TIDAK_HADIR"
+  | "SUAMI_SAJA"
+  | "ISTRI_SAJA"
+  | "SUAMI_ISTRI_HADIR";
 
 // Custom Combobox untuk pencarian Keluarga
 function KeluargaSearchCombobox({
@@ -60,32 +81,35 @@ function KeluargaSearchCombobox({
 }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // Cari opsi yang terpilih
-  const selectedOption = useMemo(() => 
-    options.find(option => option.value === value),
+  const selectedOption = useMemo(
+    () => options.find((option) => option.value === value),
     [options, value]
   );
-  
+
   // Filter opsi berdasarkan search term - tidak case sensitive
   const filteredOptions = useMemo(() => {
     if (!searchTerm) return options;
-    
-    return options.filter(option => 
+
+    return options.filter((option) =>
       option.label.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [options, searchTerm]);
 
   // Handler untuk memilih opsi
-  const handleSelect = useCallback((selectedValue: string) => {
-    const option = options.find(opt => opt.value === selectedValue);
-    if (option) {
-      onChange(option.value);
-      setSearchTerm("");
-      setOpen(false);
-    }
-  }, [onChange, options]);
-  
+  const handleSelect = useCallback(
+    (selectedValue: string) => {
+      const option = options.find((opt) => opt.value === selectedValue);
+      if (option) {
+        onChange(option.value);
+        setSearchTerm("");
+        setOpen(false);
+      }
+    },
+    [onChange, options]
+  );
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -147,35 +171,47 @@ export function AbsensiDolingFormDialog({
   jadwalDoling = [],
   keluargaList = [],
 }: AbsensiDolingFormDialogProps) {
-  const [selectedDolingId, setSelectedDolingId] = useState<string>(absensi?.doaLingkunganId || "");
-  const [keluargaId, setKeluargaId] = useState<string>(absensi?.keluargaId || "");
-  const [statusKehadiran, setStatusKehadiran] = useState<StatusKehadiran>(absensi?.statusKehadiran as StatusKehadiran || "TIDAK_HADIR");
+  const [selectedDolingId, setSelectedDolingId] = useState<string>(
+    absensi?.doaLingkunganId || ""
+  );
+  const [keluargaId, setKeluargaId] = useState<string>(
+    absensi?.keluargaId || ""
+  );
+  const [statusKehadiran, setStatusKehadiran] = useState<StatusKehadiran>(
+    (absensi?.statusKehadiran as StatusKehadiran) || "TIDAK_HADIR"
+  );
 
   // Konversi keluargaList ke ComboboxOption[]
   const keluargaOptions: ComboboxOption[] = useMemo(() => {
-    const filteredList = keluargaList
-      .filter(keluarga => !keluarga.sudahTerpilih || (absensi && keluarga.id === absensi.keluargaId));
-  
-    
-    return filteredList.map(keluarga => ({
+    const filteredList = keluargaList.filter(
+      (keluarga) =>
+        !keluarga.sudahTerpilih ||
+        (absensi && keluarga.id === absensi.keluargaId)
+    );
+
+    return filteredList.map((keluarga) => ({
       label: keluarga.nama,
-      value: keluarga.id
+      value: keluarga.id,
     }));
   }, [keluargaList, absensi]);
 
   // Filter jadwal yang sudah selesai atau terjadwal
   const availableJadwal = useMemo(() => {
     return jadwalDoling
-      .filter(jadwal => {
+      .filter((jadwal) => {
         // Pastikan tanggal valid
-        if (!jadwal.tanggal || !(jadwal.tanggal instanceof Date) || isNaN(new Date(jadwal.tanggal).getTime())) {
+        if (
+          !jadwal.tanggal ||
+          !(jadwal.tanggal instanceof Date) ||
+          isNaN(new Date(jadwal.tanggal).getTime())
+        ) {
           return false;
         }
-        
+
         // Hanya tampilkan jadwal yang:
         // 1. Status jadwal bukan selesai (jadwal yang sudah selesai tidak ditampilkan)
         // 2. Status terjadwal atau menunggu approval
-        return jadwal.status === 'terjadwal' || jadwal.status === 'menunggu';
+        return jadwal.status === "terjadwal" || jadwal.status === "menunggu";
       })
       .sort((a, b) => {
         // Urutkan berdasarkan tanggal terbaru
@@ -189,7 +225,7 @@ export function AbsensiDolingFormDialog({
   const handleKeluargaChange = useCallback((newValue: string) => {
     setKeluargaId(newValue);
   }, []);
-  
+
   // Reset form ketika dialog dibuka/ditutup
   useEffect(() => {
     if (open) {
@@ -197,17 +233,19 @@ export function AbsensiDolingFormDialog({
       if (absensi) {
         setSelectedDolingId(absensi.doaLingkunganId);
         setKeluargaId(absensi.keluargaId);
-        setStatusKehadiran(absensi.statusKehadiran as StatusKehadiran || "TIDAK_HADIR");
+        setStatusKehadiran(
+          (absensi.statusKehadiran as StatusKehadiran) || "TIDAK_HADIR"
+        );
       } else {
         // Mode tambah, reset form
         setKeluargaId("");
         setStatusKehadiran("TIDAK_HADIR");
-        
+
         // Pilih jadwal terdekat
         if (availableJadwal.length > 0) {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
-          
+
           const sortedJadwal = [...availableJadwal].sort((a, b) => {
             const dateA = new Date(a.tanggal);
             const dateB = new Date(b.tanggal);
@@ -215,7 +253,7 @@ export function AbsensiDolingFormDialog({
             const diffB = Math.abs(dateB.getTime() - today.getTime());
             return diffA - diffB;
           });
-          
+
           setSelectedDolingId(sortedJadwal[0].id);
         } else {
           setSelectedDolingId("");
@@ -233,37 +271,37 @@ export function AbsensiDolingFormDialog({
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     if (!selectedDolingId) {
       toast.error("Silakan pilih jadwal doa lingkungan terlebih dahulu.");
       return;
     }
-    
+
     if (!keluargaId) {
       toast.error("Silakan pilih keluarga terlebih dahulu.");
       return;
     }
-    
+
     const hadir = statusKehadiran !== "TIDAK_HADIR";
-    
+
     onSubmit({
       doaLingkunganId: selectedDolingId,
       absensiData: [
         {
           keluargaId: keluargaId,
           hadir: hadir,
-          statusKehadiran: statusKehadiran
-        }
-      ]
+          statusKehadiran: statusKehadiran,
+        },
+      ],
     });
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] md:max-w-[550px] w-full mx-auto">
         <DialogHeader>
           <DialogTitle>
-            {absensi ? 'Edit Absensi' : 'Tambah Absensi'}
+            {absensi ? "Edit Absensi" : "Tambah Absensi"}
           </DialogTitle>
           <DialogDescription>
             Silakan isi data kehadiran keluarga pada doa lingkungan.
@@ -273,9 +311,9 @@ export function AbsensiDolingFormDialog({
           {/* Jadwal Doling */}
           <div className="space-y-2">
             <Label htmlFor="doaLingkunganId">Jadwal Doa Lingkungan</Label>
-            <Select 
-              name="doaLingkunganId" 
-              value={selectedDolingId} 
+            <Select
+              name="doaLingkunganId"
+              value={selectedDolingId}
               onValueChange={setSelectedDolingId}
               disabled={Boolean(absensi)} // Disable jika edit mode
             >
@@ -286,9 +324,14 @@ export function AbsensiDolingFormDialog({
                 {availableJadwal.length > 0 ? (
                   availableJadwal.map((jadwal) => (
                     <SelectItem key={jadwal.id} value={jadwal.id}>
-                      {jadwal.tanggal && jadwal.tanggal instanceof Date && !isNaN(new Date(jadwal.tanggal).getTime())
-                        ? format(new Date(jadwal.tanggal), "dd MMM yyyy", { locale: id })
-                        : "Tanggal tidak valid"} - {jadwal.tuanRumah}
+                      {jadwal.tanggal &&
+                      jadwal.tanggal instanceof Date &&
+                      !isNaN(new Date(jadwal.tanggal).getTime())
+                        ? format(new Date(jadwal.tanggal), "dd MMM yyyy", {
+                            locale: id,
+                          })
+                        : "Tanggal tidak valid"}{" "}
+                      - {jadwal.tuanRumah}
                     </SelectItem>
                   ))
                 ) : (
@@ -299,7 +342,7 @@ export function AbsensiDolingFormDialog({
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="keluargaId">Nama Kepala Keluarga</Label>
             <KeluargaSearchCombobox
@@ -316,39 +359,62 @@ export function AbsensiDolingFormDialog({
               </p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label>Status Kehadiran</Label>
-            <RadioGroup value={statusKehadiran} onValueChange={(value) => setStatusKehadiran(value as StatusKehadiran)}>
+            <RadioGroup
+              value={statusKehadiran}
+              onValueChange={(value) =>
+                setStatusKehadiran(value as StatusKehadiran)
+              }
+            >
               <div className="flex items-center space-x-2 py-2">
                 <RadioGroupItem value="TIDAK_HADIR" id="tidak-hadir" />
-                <Label htmlFor="tidak-hadir" className="cursor-pointer">Tidak Hadir</Label>
+                <Label htmlFor="tidak-hadir" className="cursor-pointer">
+                  Tidak Hadir
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 py-2">
+                <RadioGroupItem value="KERABAT" id="kerabat" />
+                <Label htmlFor="kerabat" className="cursor-pointer">
+                  Kerabat
+                </Label>
               </div>
               <div className="flex items-center space-x-2 py-2">
                 <RadioGroupItem value="SUAMI_SAJA" id="suami-saja" />
-                <Label htmlFor="suami-saja" className="cursor-pointer">Suami Saja</Label>
+                <Label htmlFor="suami-saja" className="cursor-pointer">
+                  Suami Saja
+                </Label>
               </div>
               <div className="flex items-center space-x-2 py-2">
                 <RadioGroupItem value="ISTRI_SAJA" id="istri-saja" />
-                <Label htmlFor="istri-saja" className="cursor-pointer">Istri Saja</Label>
+                <Label htmlFor="istri-saja" className="cursor-pointer">
+                  Istri Saja
+                </Label>
               </div>
               <div className="flex items-center space-x-2 py-2">
                 <RadioGroupItem value="SUAMI_ISTRI_HADIR" id="keduanya-hadir" />
-                <Label htmlFor="keduanya-hadir" className="cursor-pointer">Suami dan Istri Hadir</Label>
+                <Label htmlFor="keduanya-hadir" className="cursor-pointer">
+                  Suami dan Istri Hadir
+                </Label>
               </div>
             </RadioGroup>
           </div>
-          
+
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Batal
             </Button>
             <Button type="submit">
-              {absensi ? 'Simpan Perubahan' : 'Simpan'}
+              {absensi ? "Simpan Perubahan" : "Simpan"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

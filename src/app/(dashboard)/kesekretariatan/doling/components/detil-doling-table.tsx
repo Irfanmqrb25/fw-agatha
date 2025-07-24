@@ -1,21 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DetilDoling } from "../types"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
-import { Badge } from "@/components/ui/badge"
-import { 
-  CheckIcon, 
-  SearchIcon, 
-  X, 
-  EditIcon, 
-  TrashIcon, 
-  ChevronLeftIcon, 
-  ChevronRightIcon, 
-  ChevronsLeftIcon, 
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { DetilDoling } from "../types";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckIcon,
+  SearchIcon,
+  X,
+  EditIcon,
+  TrashIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  ChevronsLeftIcon,
   ChevronsRightIcon,
   MoreVertical,
   PencilIcon,
@@ -28,16 +35,16 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-} from "lucide-react"
-import { toast } from "sonner"
-import { Input } from "@/components/ui/input"
+} from "lucide-react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,49 +55,54 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { useAuth } from "@/contexts/auth-context"
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useAuth } from "@/contexts/auth-context";
 
 interface DetilDolingTableProps {
-  detil: DetilDoling[]
-  onEdit: (detil: DetilDoling) => void
-  onDelete: (id: string) => void
-  onApprove?: (id: string) => void
-  onSelectDoling?: (id: string) => void
+  detil: DetilDoling[];
+  onEdit: (detil: DetilDoling) => void;
+  onDelete: (id: string) => void;
+  onApprove?: (id: string) => void;
+  onSelectDoling?: (id: string) => void;
 }
 
-export function DetilDolingTable({ 
-  detil, 
-  onEdit, 
+export function DetilDolingTable({
+  detil,
+  onEdit,
   onDelete,
   onApprove,
-  onSelectDoling
+  onSelectDoling,
 }: DetilDolingTableProps) {
-  const { userRole } = useAuth()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-  const [statusFilter, setStatusFilter] = useState<string | null>(null)
-  const [approveFilter, setApproveFilter] = useState<string | null>(null)
-  
+  const { userRole } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [approveFilter, setApproveFilter] = useState<string | null>(null);
+
   // Reset to first page when filters change
   useEffect(() => {
-    setCurrentPage(1)
-  }, [searchTerm, statusFilter, approveFilter])
-  
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, approveFilter]);
+
   // Format currency
   const formatRupiah = (angka: number) => {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
       minimumFractionDigits: 0,
     }).format(angka);
   };
@@ -109,8 +121,10 @@ export function DetilDolingTable({
     const matchesSearch =
       !searchTerm ||
       item.tuanRumah.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.temaIbadat && item.temaIbadat.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (item.jenisIbadat && item.jenisIbadat.toLowerCase().includes(searchTerm.toLowerCase()));
+      (item.temaIbadat &&
+        item.temaIbadat.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (item.jenisIbadat &&
+        item.jenisIbadat.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus =
       !statusFilter ||
@@ -120,30 +134,32 @@ export function DetilDolingTable({
 
     return matchesSearch && matchesStatus;
   });
-  
+
   // Calculate pagination
   const totalItems = filteredData.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalItems);
-  
+
   // Current page data
   const currentData = filteredData
     .sort((a, b) => b.tanggal.getTime() - a.tanggal.getTime()) // Newest first
     .slice(startIndex, endIndex);
-  
+
   // Page navigation
   const goToFirstPage = () => setCurrentPage(1);
   const goToLastPage = () => setCurrentPage(totalPages);
-  const goToPreviousPage = () => setCurrentPage(prev => Math.max(1, prev - 1));
-  const goToNextPage = () => setCurrentPage(prev => Math.min(totalPages, prev + 1));
-  
+  const goToPreviousPage = () =>
+    setCurrentPage((prev) => Math.max(1, prev - 1));
+  const goToNextPage = () =>
+    setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+
   // Change items per page
   const handlePageSizeChange = (value: string) => {
     setPageSize(Number(value));
     setCurrentPage(1); // Reset to first page
   };
-  
+
   // Clear all filters
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -182,17 +198,23 @@ export function DetilDolingTable({
   const getJenisIbadatBadge = (jenisIbadat?: string) => {
     if (!jenisIbadat) return null;
 
-    const jenisMap: Record<string, { color: string, label: string }> = {
-      'doa-lingkungan': { color: 'blue', label: 'Doa Lingkungan' },
-      'misa': { color: 'purple', label: 'Misa' },
-      'pertemuan': { color: 'orange', label: 'Pertemuan' },
-      'bakti-sosial': { color: 'green', label: 'Bakti Sosial' },
-      'kegiatan-lainnya': { color: 'gray', label: 'Lainnya' }
+    const jenisMap: Record<string, { color: string; label: string }> = {
+      "doa-lingkungan": { color: "blue", label: "Doa Lingkungan" },
+      misa: { color: "purple", label: "Misa" },
+      pertemuan: { color: "orange", label: "Pertemuan" },
+      "bakti-sosial": { color: "green", label: "Bakti Sosial" },
+      "kegiatan-lainnya": { color: "gray", label: "Lainnya" },
     };
 
-    const { color, label } = jenisMap[jenisIbadat] || { color: 'gray', label: jenisIbadat };
+    const { color, label } = jenisMap[jenisIbadat] || {
+      color: "gray",
+      label: jenisIbadat,
+    };
     return (
-      <Badge variant="outline" className={`bg-${color}-50 text-${color}-700 border-${color}-200`}>
+      <Badge
+        variant="outline"
+        className={`bg-${color}-50 text-${color}-700 border-${color}-200`}
+      >
         {label}
       </Badge>
     );
@@ -208,7 +230,7 @@ export function DetilDolingTable({
         </div>
       );
     }
-    
+
     return (
       <div className="flex items-center gap-1 text-amber-600">
         <XCircleIcon className="h-4 w-4" />
@@ -248,7 +270,7 @@ export function DetilDolingTable({
             </Button>
           )}
         </div>
-        
+
         <div className="flex flex-wrap gap-2">
           {/* Status Filter */}
           <Select
@@ -268,7 +290,7 @@ export function DetilDolingTable({
               <SelectItem value="dibatalkan">Dibatalkan</SelectItem>
             </SelectContent>
           </Select>
-          
+
           {/* Approval Filter */}
           <Select
             value={approveFilter === null ? "all" : approveFilter}
@@ -286,7 +308,7 @@ export function DetilDolingTable({
               <SelectItem value="notApproved">Belum Disetujui</SelectItem>
             </SelectContent>
           </Select>
-          
+
           {/* Reset button */}
           {(searchTerm || statusFilter !== null) && (
             <Button variant="outline" onClick={clearAllFilters} size="sm">
@@ -295,7 +317,7 @@ export function DetilDolingTable({
           )}
         </div>
       </div>
-      
+
       {/* Table */}
       <div className="overflow-x-auto rounded-md border">
         <Table>
@@ -308,15 +330,19 @@ export function DetilDolingTable({
               <TableHead className="w-[120px]">Kolekte</TableHead>
               <TableHead className="w-[80px]">Hadir</TableHead>
               <TableHead className="w-[120px]">Status</TableHead>
-              <TableHead className="w-[80px] sticky right-0 bg-white shadow-sm">Aksi</TableHead>
+              <TableHead className="w-[80px] sticky right-0 bg-white shadow-sm">
+                Aksi
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {currentData.length > 0 ? (
               currentData.map((item, index) => (
-                <TableRow 
+                <TableRow
                   key={item.id}
-                  className={onSelectDoling ? "cursor-pointer hover:bg-slate-50" : ""}
+                  className={
+                    onSelectDoling ? "cursor-pointer hover:bg-slate-50" : ""
+                  }
                   onClick={() => onSelectDoling && handleRowClick(item)}
                 >
                   <TableCell className="whitespace-nowrap">
@@ -325,26 +351,18 @@ export function DetilDolingTable({
                   <TableCell className="font-medium">
                     {item.tuanRumah}
                   </TableCell>
-                  <TableCell>
-                    {getJenisIbadatBadge(item.jenisIbadat)}
-                  </TableCell>
-                  <TableCell>
-                    {item.temaIbadat || "-"}
-                  </TableCell>
+                  <TableCell>{getJenisIbadatBadge(item.jenisIbadat)}</TableCell>
+                  <TableCell>{item.temaIbadat || "-"}</TableCell>
                   <TableCell>
                     {formatRupiah(item.kolekteI + item.kolekteII)}
                   </TableCell>
-                  <TableCell>
-                    {item.jumlahKKHadir} KK
-                  </TableCell>
-                  <TableCell>
-                    {getStatusBadge(item.status)}
-                  </TableCell>
+                  <TableCell>{item.jumlahKKHadir} KK</TableCell>
+                  <TableCell>{getStatusBadge(item.status)}</TableCell>
                   <TableCell className="sticky right-0 bg-white shadow-sm">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={(e) => e.stopPropagation()} // Hindari trigger onClick pada TableRow
                         >
@@ -353,12 +371,15 @@ export function DetilDolingTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation(); // Hindari trigger onClick pada TableRow
                             onEdit(item);
                           }}
-                          disabled={item.status === "selesai" && userRole !== "SUPER_USER"}
+                          disabled={
+                            item.status === "selesai" &&
+                            userRole !== "SUPER_USER"
+                          }
                         >
                           <PencilIcon className="h-4 w-4 mr-2" />
                           <span>Edit</span>
@@ -372,17 +393,26 @@ export function DetilDolingTable({
                                 e.preventDefault();
                                 e.stopPropagation(); // Hindari trigger onClick pada TableRow
                               }}
-                              disabled={item.status === "selesai" && userRole !== "SUPER_USER"}
+                              disabled={
+                                item.status === "selesai" &&
+                                userRole !== "SUPER_USER"
+                              }
                             >
                               <Trash2Icon className="h-4 w-4 mr-2" />
                               <span>Hapus</span>
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
-                          <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                          <AlertDialogContent
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Konfirmasi Hapus</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                Konfirmasi Hapus
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                Apakah Anda yakin ingin menghapus data detail doa lingkungan ini? Tindakan ini tidak dapat dibatalkan.
+                                Apakah Anda yakin ingin menghapus data detail
+                                doa lingkungan ini? Tindakan ini tidak dapat
+                                dibatalkan.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -410,7 +440,7 @@ export function DetilDolingTable({
           </TableBody>
         </Table>
       </div>
-      
+
       {/* Pagination */}
       <div className="flex flex-col items-center justify-between gap-3 pt-2">
         {/* Tombol Navigasi */}
@@ -459,13 +489,14 @@ export function DetilDolingTable({
             <span className="sr-only">Halaman terakhir</span>
           </Button>
         </div>
-        
+
         {/* Info Pages */}
         <div className="flex items-center justify-between text-xs text-muted-foreground w-full">
           <div></div> {/* Spacer untuk layout */}
           <div className="flex items-center gap-1.5">
             <span className="whitespace-nowrap">
-              {filteredData.length === 0 ? 0 : startIndex + 1}-{endIndex} dari {totalItems} data
+              {filteredData.length === 0 ? 0 : startIndex + 1}-{endIndex} dari{" "}
+              {totalItems} data
             </span>
             <span className="mx-1">•</span>
             <Select
@@ -477,7 +508,11 @@ export function DetilDolingTable({
               </SelectTrigger>
               <SelectContent side="top">
                 {[5, 10, 20, 50, 100].map((size) => (
-                  <SelectItem key={size} value={size.toString()} className="text-xs">
+                  <SelectItem
+                    key={size}
+                    value={size.toString()}
+                    className="text-xs"
+                  >
                     {size}
                   </SelectItem>
                 ))}
@@ -489,5 +524,5 @@ export function DetilDolingTable({
         </div>
       </div>
     </div>
-  )
-} 
+  );
+}

@@ -352,7 +352,7 @@ model AbsensiDoling {
   keluarga        KeluargaUmat  @relation(fields: [keluargaId], references: [id])
   keluargaId      String
   hadir           Boolean       @default(false)
-  statusKehadiran String?       // Enum: TIDAK_HADIR, SUAMI_SAJA, ISTRI_SAJA, SUAMI_ISTRI_HADIR
+  statusKehadiran String?       // Enum: TIDAK_HADIR, KERABAT, SUAMI_SAJA, ISTRI_SAJA, SUAMI_ISTRI_HADIR
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }

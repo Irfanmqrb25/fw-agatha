@@ -1,10 +1,19 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { JenisIbadat, SubIbadat, StatusApproval, StatusKegiatan } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import {
+  JenisIbadat,
+  SubIbadat,
+  StatusApproval,
+  StatusKegiatan,
+} from "@prisma/client";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { format } from "date-fns";
-import { createJakartaMonthRange, nowInJakarta, createJakartaYearRange } from "@/lib/timezone";
+import {
+  createJakartaMonthRange,
+  nowInJakarta,
+  createJakartaYearRange,
+} from "@/lib/timezone";
 
 // Tipe data yang digunakan UI
 export interface DolingData {
@@ -76,17 +85,17 @@ export async function getAllDoling(): Promise<DolingData[]> {
         approval: true,
       },
       orderBy: {
-        tanggal: 'desc',
+        tanggal: "desc",
       },
     });
 
-    return dolingData.map(doling => ({
+    return dolingData.map((doling) => ({
       id: doling.id,
       tanggal: doling.tanggal,
-      waktu: doling.tanggal.toLocaleTimeString('id-ID', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false
+      waktu: doling.tanggal.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       }),
       tuanRumah: doling.tuanRumah.namaKepalaKeluarga,
       tuanRumahId: doling.tuanRumahId,
@@ -96,8 +105,12 @@ export async function getAllDoling(): Promise<DolingData[]> {
       subIbadat: doling.subIbadat,
       customSubIbadat: doling.customSubIbadat,
       temaIbadat: doling.temaIbadat,
-      status: doling.statusKegiatan === StatusKegiatan.SELESAI ? 'selesai' : 
-             doling.statusKegiatan === StatusKegiatan.DIBATALKAN ? 'dibatalkan' : 'menunggu',
+      status:
+        doling.statusKegiatan === StatusKegiatan.SELESAI
+          ? "selesai"
+          : doling.statusKegiatan === StatusKegiatan.DIBATALKAN
+          ? "dibatalkan"
+          : "menunggu",
       statusKegiatan: doling.statusKegiatan || StatusKegiatan.BELUM_SELESAI,
       jumlahKKHadir: doling.jumlahKKHadir,
       bapak: doling.bapak,
@@ -147,10 +160,10 @@ export async function getDolingById(id: string): Promise<DolingData | null> {
     return {
       id: doling.id,
       tanggal: doling.tanggal,
-      waktu: doling.tanggal.toLocaleTimeString('id-ID', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false
+      waktu: doling.tanggal.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       }),
       tuanRumah: doling.tuanRumah.namaKepalaKeluarga,
       tuanRumahId: doling.tuanRumahId,
@@ -160,8 +173,12 @@ export async function getDolingById(id: string): Promise<DolingData | null> {
       subIbadat: doling.subIbadat,
       customSubIbadat: doling.customSubIbadat,
       temaIbadat: doling.temaIbadat,
-      status: doling.statusKegiatan === StatusKegiatan.SELESAI ? 'selesai' : 
-             doling.statusKegiatan === StatusKegiatan.DIBATALKAN ? 'dibatalkan' : 'menunggu',
+      status:
+        doling.statusKegiatan === StatusKegiatan.SELESAI
+          ? "selesai"
+          : doling.statusKegiatan === StatusKegiatan.DIBATALKAN
+          ? "dibatalkan"
+          : "menunggu",
       statusKegiatan: doling.statusKegiatan || StatusKegiatan.BELUM_SELESAI,
       jumlahKKHadir: doling.jumlahKKHadir,
       bapak: doling.bapak,
@@ -196,16 +213,18 @@ export async function getDolingById(id: string): Promise<DolingData | null> {
 /**
  * Mendapatkan data keluarga yang tersedia sebagai tuan rumah
  */
-export async function getKeluargaForSelection(dolingId?: string): Promise<KeluargaForSelect[]> {
+export async function getKeluargaForSelection(
+  dolingId?: string
+): Promise<KeluargaForSelect[]> {
   try {
     // Ambil semua keluarga yang masih aktif (status HIDUP dan belum keluar)
     const keluargaData = await prisma.keluargaUmat.findMany({
       where: {
-        status: 'HIDUP',
+        status: "HIDUP",
         tanggalKeluar: null,
       },
       orderBy: {
-        namaKepalaKeluarga: 'asc',
+        namaKepalaKeluarga: "asc",
       },
       include: {
         // Sertakan relasi doaLingkungan untuk mengetahui apakah keluarga pernah menjadi tuan rumah
@@ -228,16 +247,18 @@ export async function getKeluargaForSelection(dolingId?: string): Promise<Keluar
           keluargaId: true,
         },
       });
-      absensiKeluargaIds = existingAbsensi.map(absensi => absensi.keluargaId);
+      absensiKeluargaIds = existingAbsensi.map((absensi) => absensi.keluargaId);
     }
 
     // Map data keluarga ke format yang dibutuhkan UI
-    return keluargaData.map(keluarga => ({
+    return keluargaData.map((keluarga) => ({
       id: keluarga.id,
       nama: keluarga.namaKepalaKeluarga,
       alamat: keluarga.alamat,
       nomorTelepon: keluarga.nomorTelepon,
-      sudahTerpilih: dolingId ? absensiKeluargaIds.includes(keluarga.id) : false,
+      sudahTerpilih: dolingId
+        ? absensiKeluargaIds.includes(keluarga.id)
+        : false,
     }));
   } catch (error) {
     console.error("Error getting keluarga data:", error);
@@ -262,7 +283,9 @@ export async function addDoling(data: {
     if (data.subIbadat) {
       try {
         // Coba validasi apakah nilai subIbadat ada dalam enum SubIbadat
-        const isValidSubIbadat = Object.values(SubIbadat).includes(data.subIbadat as SubIbadat);
+        const isValidSubIbadat = Object.values(SubIbadat).includes(
+          data.subIbadat as SubIbadat
+        );
         if (isValidSubIbadat) {
           validSubIbadat = data.subIbadat;
         }
@@ -270,18 +293,18 @@ export async function addDoling(data: {
         console.error("Error validating subIbadat:", error);
       }
     }
-    
+
     // Verifikasi bahwa keluarga yang dipilih ada di database
     const keluarga = await prisma.keluargaUmat.findUnique({
-      where: { 
-        id: data.tuanRumahId 
-      }
+      where: {
+        id: data.tuanRumahId,
+      },
     });
-    
+
     if (!keluarga) {
       throw new Error(`Keluarga dengan ID ${data.tuanRumahId} tidak ditemukan`);
     }
-    
+
     // Gunakan transaksi untuk memastikan konsistensi data
     const result = await prisma.$transaction(async (tx) => {
       // Buat data doa lingkungan baru
@@ -305,7 +328,7 @@ export async function addDoling(data: {
         data: {
           doaLingkunganId: newDoling.id,
           status: StatusApproval.PENDING,
-        }
+        },
       });
 
       return { newDoling, approval };
@@ -319,10 +342,10 @@ export async function addDoling(data: {
     return {
       id: result.newDoling.id,
       tanggal: result.newDoling.tanggal,
-      waktu: result.newDoling.tanggal.toLocaleTimeString('id-ID', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false
+      waktu: result.newDoling.tanggal.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       }),
       tuanRumah: result.newDoling.tuanRumah.namaKepalaKeluarga,
       tuanRumahId: result.newDoling.tuanRumahId,
@@ -332,8 +355,9 @@ export async function addDoling(data: {
       subIbadat: result.newDoling.subIbadat,
       customSubIbadat: result.newDoling.customSubIbadat,
       temaIbadat: result.newDoling.temaIbadat,
-      status: 'menunggu',
-      statusKegiatan: result.newDoling.statusKegiatan || StatusKegiatan.BELUM_SELESAI,
+      status: "menunggu",
+      statusKegiatan:
+        result.newDoling.statusKegiatan || StatusKegiatan.BELUM_SELESAI,
       jumlahKKHadir: 0,
       bapak: 0,
       ibu: 0,
@@ -367,35 +391,38 @@ export async function addDoling(data: {
 /**
  * Mengupdate detail doa lingkungan
  */
-export async function updateDolingDetail(id: string, data: {
-  jumlahKKHadir?: number;
-  bapak?: number;
-  ibu?: number;
-  omk?: number;
-  bir?: number;
-  biaBawah?: number;
-  biaAtas?: number;
-  kolekteI?: number;
-  kolekteII?: number;
-  ucapanSyukur?: number;
-  pemimpinIbadat?: string;
-  pemimpinRosario?: string;
-  pembawaRenungan?: string;
-  pembawaLagu?: string;
-  doaUmat?: string;
-  bacaan?: string;
-  pemimpinMisa?: string;
-  bacaanI?: string;
-  pemazmur?: string;
-  jumlahPeserta?: number;
-  status?: StatusKegiatan;
-  statusKegiatan?: StatusKegiatan;
-  customSubIbadat?: string | null;
-}): Promise<DolingData> {
+export async function updateDolingDetail(
+  id: string,
+  data: {
+    jumlahKKHadir?: number;
+    bapak?: number;
+    ibu?: number;
+    omk?: number;
+    bir?: number;
+    biaBawah?: number;
+    biaAtas?: number;
+    kolekteI?: number;
+    kolekteII?: number;
+    ucapanSyukur?: number;
+    pemimpinIbadat?: string;
+    pemimpinRosario?: string;
+    pembawaRenungan?: string;
+    pembawaLagu?: string;
+    doaUmat?: string;
+    bacaan?: string;
+    pemimpinMisa?: string;
+    bacaanI?: string;
+    pemazmur?: string;
+    jumlahPeserta?: number;
+    status?: StatusKegiatan;
+    statusKegiatan?: StatusKegiatan;
+    customSubIbadat?: string | null;
+  }
+): Promise<DolingData> {
   try {
     // Jika tidak ada perubahan pada jumlahKKHadir, gunakan data absensi yang sebenarnya
     let finalJumlahKKHadir = data.jumlahKKHadir;
-    
+
     if (finalJumlahKKHadir === undefined) {
       // Hitung berdasarkan data absensi yang ada
       const actualAttendanceCount = await prisma.absensiDoling.count({
@@ -437,7 +464,7 @@ export async function updateDolingDetail(id: string, data: {
       include: {
         tuanRumah: true,
         approval: true,
-      }
+      },
     });
 
     // Refresh data
@@ -448,7 +475,7 @@ export async function updateDolingDetail(id: string, data: {
     return {
       id: updatedDoling.id,
       tanggal: updatedDoling.tanggal,
-      waktu: format(updatedDoling.tanggal, 'HH:mm'),
+      waktu: format(updatedDoling.tanggal, "HH:mm"),
       tuanRumah: updatedDoling.tuanRumah.namaKepalaKeluarga,
       tuanRumahId: updatedDoling.tuanRumahId,
       alamat: updatedDoling.tuanRumah.alamat,
@@ -457,8 +484,12 @@ export async function updateDolingDetail(id: string, data: {
       subIbadat: updatedDoling.subIbadat,
       customSubIbadat: updatedDoling.customSubIbadat,
       temaIbadat: updatedDoling.temaIbadat,
-      status: updatedDoling.statusKegiatan === StatusKegiatan.SELESAI ? 'selesai' : 
-             updatedDoling.statusKegiatan === StatusKegiatan.DIBATALKAN ? 'dibatalkan' : 'menunggu',
+      status:
+        updatedDoling.statusKegiatan === StatusKegiatan.SELESAI
+          ? "selesai"
+          : updatedDoling.statusKegiatan === StatusKegiatan.DIBATALKAN
+          ? "dibatalkan"
+          : "menunggu",
       statusKegiatan: updatedDoling.statusKegiatan,
       jumlahKKHadir: updatedDoling.jumlahKKHadir,
       bapak: updatedDoling.bapak,
@@ -482,7 +513,7 @@ export async function updateDolingDetail(id: string, data: {
       jumlahPeserta: updatedDoling.jumlahPeserta,
       approved: updatedDoling.approval?.status === StatusApproval.APPROVED,
       createdAt: updatedDoling.createdAt,
-      updatedAt: updatedDoling.updatedAt
+      updatedAt: updatedDoling.updatedAt,
     };
   } catch (error) {
     console.error("Error updating doa lingkungan detail:", error);
@@ -493,7 +524,9 @@ export async function updateDolingDetail(id: string, data: {
 /**
  * Mendapatkan absensi untuk doa lingkungan tertentu
  */
-export async function getAbsensiByDolingId(dolingId: string): Promise<AbsensiData[]> {
+export async function getAbsensiByDolingId(
+  dolingId: string
+): Promise<AbsensiData[]> {
   try {
     // Validasi dolingId
     if (!dolingId || dolingId.trim() === "") {
@@ -509,7 +542,6 @@ export async function getAbsensiByDolingId(dolingId: string): Promise<AbsensiDat
       return [];
     }
 
-
     // Ambil data absensi
     const absensiData = await prisma.absensiDoling.findMany({
       where: {
@@ -520,13 +552,12 @@ export async function getAbsensiByDolingId(dolingId: string): Promise<AbsensiDat
       },
       orderBy: {
         keluarga: {
-          namaKepalaKeluarga: 'asc',
+          namaKepalaKeluarga: "asc",
         },
       },
     });
 
-
-    return absensiData.map(absensi => {
+    return absensiData.map((absensi) => {
       // Memastikan statusKehadiran selalu memiliki nilai yang valid
       let statusKehadiran = absensi.statusKehadiran;
       if (!statusKehadiran) {
@@ -553,9 +584,11 @@ export async function getAbsensiByDolingId(dolingId: string): Promise<AbsensiDat
 /**
  * Menambahkan atau mengupdate data absensi
  */
-export async function updateAbsensi(dolingId: string, data: { keluargaId: string, hadir: boolean, statusKehadiran: string }[]): Promise<void> {
+export async function updateAbsensi(
+  dolingId: string,
+  data: { keluargaId: string; hadir: boolean; statusKehadiran: string }[]
+): Promise<void> {
   try {
-
     // Validasi dolingId
     if (!dolingId || dolingId.trim() === "") {
       throw new Error("dolingId kosong atau tidak valid");
@@ -602,27 +635,27 @@ export async function updateAbsensi(dolingId: string, data: { keluargaId: string
 
         if (existingAbsensi) {
           // Update jika sudah ada
-          const updated = await tx.absensiDoling.update({
+          await tx.absensiDoling.update({
             where: { id: existingAbsensi.id },
-            data: { 
+            data: {
               hadir: item.hadir,
-              statusKehadiran: item.statusKehadiran
-            }
+              statusKehadiran: item.statusKehadiran,
+            },
           });
         } else {
           // Buat baru jika belum ada
-          const created = await tx.absensiDoling.create({
+          await tx.absensiDoling.create({
             data: {
               doaLingkungan: { connect: { id: dolingId } },
               keluarga: { connect: { id: item.keluargaId } },
               hadir: item.hadir,
-              statusKehadiran: item.statusKehadiran
-            }
+              statusKehadiran: item.statusKehadiran,
+            },
           });
         }
       }
 
-      // Update jumlahKKHadir pada doa lingkungan
+      // Update jumlah KK Hadir pada doa lingkungan
       const hadirCount = await tx.absensiDoling.count({
         where: {
           doaLingkunganId: dolingId,
@@ -632,22 +665,28 @@ export async function updateAbsensi(dolingId: string, data: { keluargaId: string
 
       await tx.doaLingkungan.update({
         where: { id: dolingId },
-        data: { jumlahKKHadir: hadirCount }
+        data: { jumlahKKHadir: hadirCount },
       });
-
     });
 
     revalidatePath("/kesekretariatan/doling");
   } catch (error) {
     console.error("Error updating absensi:", error);
-    throw new Error(`Gagal mengupdate data absensi: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Gagal mengupdate data absensi: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 
 /**
  * Mengubah status approval
  */
-export async function updateApprovalStatus(dolingId: string, status: StatusApproval): Promise<void> {
+export async function updateApprovalStatus(
+  dolingId: string,
+  status: StatusApproval
+): Promise<void> {
   try {
     // Cek apakah approval sudah ada
     const existingApproval = await prisma.approval.findFirst({
@@ -660,15 +699,15 @@ export async function updateApprovalStatus(dolingId: string, status: StatusAppro
       // Update approval yang sudah ada
       await prisma.approval.update({
         where: { id: existingApproval.id },
-        data: { status }
+        data: { status },
       });
     } else {
       // Buat approval baru
       await prisma.approval.create({
         data: {
           doaLingkungan: { connect: { id: dolingId } },
-          status
-        }
+          status,
+        },
       });
     }
 
@@ -715,16 +754,18 @@ export async function deleteDoling(id: string): Promise<void> {
 /**
  * Mendapatkan data riwayat kehadiran keluarga
  */
-export async function getRiwayatKehadiran(): Promise<{
-  nama: string;
-  totalHadir: number;
-  persentase: number;
-}[]> {
+export async function getRiwayatKehadiran(): Promise<
+  {
+    nama: string;
+    totalHadir: number;
+    persentase: number;
+  }[]
+> {
   try {
     // Get all families with their attendance records
     const keluarga = await prisma.keluargaUmat.findMany({
       where: {
-        status: 'HIDUP',
+        status: "HIDUP",
         tanggalKeluar: null,
       },
       select: {
@@ -737,31 +778,34 @@ export async function getRiwayatKehadiran(): Promise<{
               select: {
                 statusKegiatan: true,
                 tanggal: true,
-              }
-            }
+              },
+            },
           },
         },
       },
     });
 
     // Calculate attendance statistics - hanya hitung dari kegiatan yang sudah selesai
-    return keluarga.map(k => {
-      // Filter absensi hanya dari kegiatan yang sudah berlalu (gunakan timezone Jakarta)
-      const currentTime = nowInJakarta();
-      const validAbsensi = k.absensiDoling.filter(a => 
-        a.doaLingkungan.tanggal <= currentTime // Hanya kegiatan yang sudah berlalu
-      );
-      
-      const totalAbsensi = validAbsensi.length;
-      const totalHadir = validAbsensi.filter(a => a.hadir).length;
-      const persentase = totalAbsensi > 0 ? (totalHadir / totalAbsensi) * 100 : 0;
+    return keluarga
+      .map((k) => {
+        // Filter absensi hanya dari kegiatan yang sudah berlalu (gunakan timezone Jakarta)
+        const currentTime = nowInJakarta();
+        const validAbsensi = k.absensiDoling.filter(
+          (a) => a.doaLingkungan.tanggal <= currentTime // Hanya kegiatan yang sudah berlalu
+        );
 
-      return {
-        nama: k.namaKepalaKeluarga,
-        totalHadir,
-        persentase: Math.round(persentase), // Bulatkan persentase ke bilangan bulat
-      };
-    }).sort((a, b) => b.persentase - a.persentase);
+        const totalAbsensi = validAbsensi.length;
+        const totalHadir = validAbsensi.filter((a) => a.hadir).length;
+        const persentase =
+          totalAbsensi > 0 ? (totalHadir / totalAbsensi) * 100 : 0;
+
+        return {
+          nama: k.namaKepalaKeluarga,
+          totalHadir,
+          persentase: Math.round(persentase), // Bulatkan persentase ke bilangan bulat
+        };
+      })
+      .sort((a, b) => b.persentase - a.persentase);
   } catch (error) {
     console.error("Error getting attendance history:", error);
     throw new Error("Gagal mengambil riwayat kehadiran");
@@ -771,24 +815,36 @@ export async function getRiwayatKehadiran(): Promise<{
 /**
  * Mendapatkan rekapitulasi kegiatan per bulan
  */
-export async function getRekapitulasiBulanan(tahun: number): Promise<{
-  bulan: string;
-  jumlahKegiatan: number;
-  rataRataHadir: number;
-}[]> {
+export async function getRekapitulasiBulanan(tahun: number): Promise<
+  {
+    bulan: string;
+    jumlahKegiatan: number;
+    rataRataHadir: number;
+  }[]
+> {
   try {
     const namaBulan = [
-      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
     ];
-    
+
     const hasil = [];
-    
+
     // Loop through months
     for (let bulan = 0; bulan < 12; bulan++) {
       // Gunakan timezone Jakarta untuk konsistensi
       const { startDate, endDate } = createJakartaMonthRange(tahun, bulan);
-      
+
       // Get doling data for this month
       const dolingData = await prisma.doaLingkungan.findMany({
         where: {
@@ -803,13 +859,13 @@ export async function getRekapitulasiBulanan(tahun: number): Promise<{
           statusKegiatan: true,
         },
       });
-      
+
       const jumlahKegiatan = dolingData.length;
-      
+
       // Hitung rata-rata kehadiran berdasarkan data absensi yang sebenarnya
       let totalHadir = 0;
       let kegiatanDenganAbsensi = 0;
-      
+
       for (const doling of dolingData) {
         // Hanya hitung kegiatan yang sudah berlalu (gunakan timezone Jakarta)
         const currentTime = nowInJakarta();
@@ -821,22 +877,24 @@ export async function getRekapitulasiBulanan(tahun: number): Promise<{
               hadir: true,
             },
           });
-          
+
           totalHadir += absensiCount;
           kegiatanDenganAbsensi++;
         }
       }
-      
-      const rataRataHadir = kegiatanDenganAbsensi > 0 ? 
-        Math.round((totalHadir / kegiatanDenganAbsensi) * 100) / 100 : 0;
-      
+
+      const rataRataHadir =
+        kegiatanDenganAbsensi > 0
+          ? Math.round((totalHadir / kegiatanDenganAbsensi) * 100) / 100
+          : 0;
+
       hasil.push({
         bulan: `${namaBulan[bulan]} ${tahun}`,
         jumlahKegiatan,
         rataRataHadir,
       });
     }
-    
+
     return hasil;
   } catch (error) {
     console.error("Error getting monthly recap:", error);
@@ -856,7 +914,7 @@ export async function getKaleidoskopData(): Promise<{
     // Get total kegiatan this year menggunakan timezone Jakarta
     const currentYear = new Date().getFullYear();
     const { startDate, endDate } = createJakartaYearRange(currentYear);
-    
+
     const kegiatanCount = await prisma.doaLingkungan.count({
       where: {
         tanggal: {
@@ -865,7 +923,7 @@ export async function getKaleidoskopData(): Promise<{
         },
       },
     });
-    
+
     // Calculate average attendance
     const dolingData = await prisma.doaLingkungan.findMany({
       where: {
@@ -878,18 +936,19 @@ export async function getKaleidoskopData(): Promise<{
         jumlahKKHadir: true,
       },
     });
-    
+
     const totalHadir = dolingData.reduce((sum, d) => sum + d.jumlahKKHadir, 0);
-    const rataRataKehadiran = kegiatanCount > 0 ? totalHadir / kegiatanCount : 0;
-    
+    const rataRataKehadiran =
+      kegiatanCount > 0 ? totalHadir / kegiatanCount : 0;
+
     // Get total active families
     const totalKKAktif = await prisma.keluargaUmat.count({
       where: {
-        status: 'HIDUP',
+        status: "HIDUP",
         tanggalKeluar: null,
       },
     });
-    
+
     return {
       totalKegiatan: kegiatanCount,
       rataRataKehadiran,
@@ -906,11 +965,10 @@ export async function getKaleidoskopData(): Promise<{
  */
 export async function deleteAbsensi(absensiId: string): Promise<void> {
   try {
-
     // Dapatkan data absensi terlebih dahulu untuk mengetahui dolingId-nya
     const absensi = await prisma.absensiDoling.findUnique({
       where: { id: absensiId },
-      select: { doaLingkunganId: true }
+      select: { doaLingkunganId: true },
     });
 
     if (!absensi) {
@@ -923,7 +981,7 @@ export async function deleteAbsensi(absensiId: string): Promise<void> {
     await prisma.$transaction(async (tx) => {
       // Hapus absensi
       await tx.absensiDoling.delete({
-        where: { id: absensiId }
+        where: { id: absensiId },
       });
 
       // Update jumlahKKHadir pada doa lingkungan
@@ -936,14 +994,17 @@ export async function deleteAbsensi(absensiId: string): Promise<void> {
 
       await tx.doaLingkungan.update({
         where: { id: dolingId },
-        data: { jumlahKKHadir: hadirCount }
+        data: { jumlahKKHadir: hadirCount },
       });
-
     });
 
     revalidatePath("/kesekretariatan/doling");
   } catch (error) {
     console.error("Error deleting absensi:", error);
-    throw new Error(`Gagal menghapus absensi: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Gagal menghapus absensi: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
-} 
+}
