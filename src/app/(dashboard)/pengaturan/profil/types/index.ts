@@ -51,7 +51,7 @@ export interface FamilyHead {
   email: string;
   occupation: string;
   education: string; // Pendidikan terakhir
-  religion: Religion; // Agama
+  religion?: string; // Agama
   livingStatus: LivingStatus; // Status hidup/meninggal
   bidukNumber?: string | null; // No. Biduk jika Katolik
   baptismDate?: Date | null; // Tanggal baptis

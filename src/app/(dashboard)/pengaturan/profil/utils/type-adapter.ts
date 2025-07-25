@@ -31,6 +31,15 @@ export function mapAgamaToReligion(agama: Agama): Religion {
   return mapping[agama] || Religion.CATHOLIC;
 }
 
+// Konversi jenis kelamin (database) ke Gender (UI)
+export function mapDbGenderToUiGender(dbGender: string): Gender {
+  const mapping: Record<string, Gender> = {
+    "LAKI-LAKI": Gender.MALE,
+    PEREMPUAN: Gender.FEMALE,
+  };
+  return mapping[dbGender];
+}
+
 // Konversi Religion (UI) ke Agama (database)
 export function mapReligionToAgama(religion: Religion): Agama {
   const mapping: Record<Religion, Agama> = {
@@ -132,6 +141,12 @@ export function convertFamilyHeadFormToDbData(formData: FamilyHeadFormValues) {
     baptismDate: formData.baptismDate,
     confirmationDate: formData.confirmationDate,
     deathDate: formData.deathDate,
+    email: formData.email || "",
+    nik: formData.nik || "",
+    occupation: formData.occupation || "",
+    religion: mapReligionToAgama(formData.religion),
+    bidukNumber: formData.bidukNumber || "",
+    gender: formData.gender,
   };
 }
 
@@ -149,6 +164,12 @@ export function convertSpouseFormToDbData(formData: SpouseFormValues) {
     baptismDate: formData.baptismDate,
     confirmationDate: formData.confirmationDate,
     deathDate: formData.deathDate,
+    nik: formData.nik || "",
+    occupation: formData.occupation || "",
+    gender: formData.gender,
+    address: formData.address || "",
+    city: formData.city || "",
+    email: formData.email || "",
   };
 }
 
@@ -164,6 +185,7 @@ export function convertDependentFormToDbData(formData: DependentFormValues) {
     maritalStatus: mapMaritalStatusToStatusPernikahan(formData.maritalStatus),
     baptismDate: formData.baptismDate,
     confirmationDate: formData.confirmationDate,
+    gender: formData.gender,
   };
 
   return formattedData;

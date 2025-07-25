@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { CalendarIcon, Save, Loader2 } from "lucide-react"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CalendarIcon, Save, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -16,28 +16,35 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { FamilyHeadFormValues, familyHeadFormSchema, Gender, MaritalStatus, LivingStatus, Religion } from "../types"
+} from "@/components/ui/popover";
+import {
+  FamilyHeadFormValues,
+  familyHeadFormSchema,
+  Gender,
+  MaritalStatus,
+  LivingStatus,
+  Religion,
+} from "../types";
 
 interface FamilyHeadFormProps {
-  defaultValues?: Partial<FamilyHeadFormValues>
-  onSubmit: (values: FamilyHeadFormValues) => void
-  isSubmitting?: boolean
-  readOnly?: boolean
+  defaultValues?: Partial<FamilyHeadFormValues>;
+  onSubmit: (values: FamilyHeadFormValues) => void;
+  isSubmitting?: boolean;
+  readOnly?: boolean;
 }
 
 export function FamilyHeadForm({
@@ -68,14 +75,14 @@ export function FamilyHeadForm({
       deathDate: null,
       ...defaultValues,
     },
-  })
-  
+  });
+
   // Ambil status hidup/meninggal untuk kondisional rendering
-  const livingStatus = form.watch("livingStatus")
+  const livingStatus = form.watch("livingStatus");
   // Ambil status pernikahan untuk kondisional rendering
-  const maritalStatus = form.watch("maritalStatus")
+  const maritalStatus = form.watch("maritalStatus");
   // Ambil agama untuk kondisional rendering
-  const religion = form.watch("religion")
+  const religion = form.watch("religion");
 
   return (
     <Form {...form}>
@@ -231,8 +238,12 @@ export function FamilyHeadForm({
                     <SelectItem value={MaritalStatus.MARRIED}>
                       Menikah
                     </SelectItem>
-                    <SelectItem value={MaritalStatus.DIVORCED}>Cerai Hidup</SelectItem>
-                    <SelectItem value={MaritalStatus.WIDOWED}>Cerai Mati</SelectItem>
+                    <SelectItem value={MaritalStatus.DIVORCED}>
+                      Cerai Hidup
+                    </SelectItem>
+                    <SelectItem value={MaritalStatus.WIDOWED}>
+                      Cerai Mati
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -259,7 +270,9 @@ export function FamilyHeadForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value={Religion.CATHOLIC}>Katolik</SelectItem>
-                    <SelectItem value={Religion.PROTESTANT}>Protestan</SelectItem>
+                    <SelectItem value={Religion.PROTESTANT}>
+                      Protestan
+                    </SelectItem>
                     <SelectItem value={Religion.ISLAM}>Islam</SelectItem>
                     <SelectItem value={Religion.HINDU}>Hindu</SelectItem>
                     <SelectItem value={Religion.BUDDHA}>Buddha</SelectItem>
@@ -401,7 +414,9 @@ export function FamilyHeadForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value={LivingStatus.ALIVE}>Hidup</SelectItem>
-                    <SelectItem value={LivingStatus.DECEASED}>Meninggal</SelectItem>
+                    <SelectItem value={LivingStatus.DECEASED}>
+                      Meninggal
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -432,7 +447,8 @@ export function FamilyHeadForm({
           )}
 
           {/* Tanggal Baptis - hanya untuk Katolik/Protestan */}
-          {(religion === Religion.CATHOLIC || religion === Religion.PROTESTANT) && (
+          {(religion === Religion.CATHOLIC ||
+            religion === Religion.PROTESTANT) && (
             <FormField
               control={form.control}
               name="baptismDate"
@@ -583,9 +599,9 @@ export function FamilyHeadForm({
 
         {/* Form actions */}
         <div className="flex justify-end pt-2">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || readOnly} 
+          <Button
+            type="submit"
+            disabled={isSubmitting || readOnly}
             className="w-full sm:w-auto"
             size="sm"
           >
@@ -604,5 +620,5 @@ export function FamilyHeadForm({
         </div>
       </form>
     </Form>
-  )
-} 
+  );
+}

@@ -7,6 +7,7 @@ import {
   mapStatusToLivingStatus,
   mapStatusPernikahanToMaritalStatus,
   mapJenisTanggunganToDependentType,
+  mapDbGenderToUiGender,
 } from "../utils/type-adapter";
 
 /**
@@ -22,22 +23,25 @@ export async function adaptProfileData(
     familyHead: {
       id: parseInt(keluarga.id),
       fullName: keluarga.namaKepalaKeluarga,
-      gender: Gender.MALE,
+      gender:
+        mapDbGenderToUiGender(
+          keluarga?.jenisKelamin?.toUpperCase() as string
+        ) || Gender.MALE,
       birthPlace: keluarga.tempatLahir || "",
       birthDate: keluarga.tanggalLahir || new Date(),
-      nik: "",
+      nik: keluarga.nik || "",
       maritalStatus: mapStatusPernikahanToMaritalStatus(
         keluarga.statusPernikahan
       ),
       address: keluarga.alamat,
       city: keluarga.kotaDomisili || "",
       phoneNumber: keluarga.nomorTelepon || "",
-      email: "",
-      occupation: "",
+      email: keluarga.email || "",
+      occupation: keluarga.pekerjaan || "",
       education: keluarga.pendidikanTerakhir || "",
-      religion: Religion.CATHOLIC,
+      religion: mapAgamaToReligion(keluarga.agama) || Religion.CATHOLIC,
       livingStatus: mapStatusToLivingStatus(keluarga.status),
-      bidukNumber: "",
+      bidukNumber: keluarga.noBiduk || "",
       baptismDate: keluarga.tanggalBaptis || null,
       confirmationDate: keluarga.tanggalKrisma || null,
       deathDate: keluarga.tanggalMeninggal || null,
@@ -47,17 +51,21 @@ export async function adaptProfileData(
       ? {
           id: parseInt(keluarga.pasangan.id),
           fullName: keluarga.pasangan.nama,
-          gender: Gender.FEMALE,
+          gender:
+            mapDbGenderToUiGender(
+              keluarga.pasangan?.jenisKelamin?.toUpperCase() as string
+            ) || Gender.FEMALE,
           birthPlace: keluarga.pasangan.tempatLahir,
           birthDate: keluarga.pasangan.tanggalLahir,
-          nik: "",
-          address: keluarga.alamat,
-          city: keluarga.kotaDomisili || "",
+          nik: keluarga.pasangan.nik || "",
+          address: keluarga.pasangan.alamat || "",
+          city: keluarga.pasangan.kotaDomisili || "",
           phoneNumber: keluarga.pasangan.nomorTelepon || "",
-          email: "",
-          occupation: "",
+          email: keluarga.pasangan.email || "",
+          occupation: keluarga.pasangan.pekerjaan || "",
           education: keluarga.pasangan.pendidikanTerakhir,
-          religion: mapAgamaToReligion(keluarga.pasangan.agama),
+          religion:
+            mapAgamaToReligion(keluarga.pasangan.agama) || Religion.CATHOLIC,
           livingStatus: mapStatusToLivingStatus(keluarga.pasangan.status),
           bidukNumber: keluarga.pasangan.noBiduk || "",
           baptismDate: keluarga.pasangan.tanggalBaptis || null,
@@ -72,7 +80,9 @@ export async function adaptProfileData(
       dependentType: mapJenisTanggunganToDependentType(
         dependent.jenisTanggungan
       ),
-      gender: Gender.MALE,
+      gender: mapDbGenderToUiGender(
+        dependent.jenisKelamin?.toUpperCase() as string
+      ),
       birthPlace: dependent.tempatLahir,
       birthDate: dependent.tanggalLahir,
       education: dependent.pendidikanTerakhir,

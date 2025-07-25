@@ -103,6 +103,12 @@ export async function updateFamilyHead(
     baptismDate?: Date | null;
     confirmationDate?: Date | null;
     deathDate?: Date | null;
+    email?: string | null;
+    nik?: string | null;
+    occupation?: string | null;
+    religion: Agama;
+    bidukNumber?: string | null;
+    gender?: string | null;
   }
 ) {
   try {
@@ -132,6 +138,12 @@ export async function updateFamilyHead(
         tanggalBaptis: data.baptismDate,
         tanggalKrisma: data.confirmationDate,
         tanggalMeninggal: data.deathDate,
+        email: data.email,
+        nik: data.nik,
+        pekerjaan: data.occupation,
+        agama: data.religion,
+        noBiduk: data.bidukNumber,
+        jenisKelamin: data.gender || "LAKI-LAKI",
       },
     });
 
@@ -177,6 +189,12 @@ export async function updateSpouse(
     baptismDate?: Date | null;
     confirmationDate?: Date | null;
     deathDate?: Date | null;
+    email?: string | null;
+    nik?: string | null;
+    address?: string | null;
+    gender?: string | null;
+    occupation?: string | null;
+    city?: string | null;
   }
 ) {
   try {
@@ -210,6 +228,12 @@ export async function updateSpouse(
           tanggalBaptis: data.baptismDate,
           tanggalKrisma: data.confirmationDate,
           tanggalMeninggal: data.deathDate,
+          email: data.email,
+          nik: data.nik,
+          pekerjaan: data.occupation,
+          alamat: data.address,
+          kotaDomisili: data.city,
+          jenisKelamin: data.gender || "PEREMPUAN",
         },
       });
     } else {
@@ -227,6 +251,12 @@ export async function updateSpouse(
           tanggalBaptis: data.baptismDate,
           tanggalKrisma: data.confirmationDate,
           tanggalMeninggal: data.deathDate,
+          jenisKelamin: Gender.FEMALE,
+          email: data.email,
+          nik: data.nik,
+          pekerjaan: data.occupation,
+          alamat: data.address,
+          kotaDomisili: data.city,
           keluarga: {
             connect: { id: user.keluargaId },
           },
@@ -268,6 +298,7 @@ export async function addDependent(
     maritalStatus: StatusPernikahan;
     baptismDate?: Date | null;
     confirmationDate?: Date | null;
+    gender: string | null;
   }
 ) {
   try {
@@ -293,6 +324,7 @@ export async function addDependent(
         statusPernikahan: data.maritalStatus,
         tanggalBaptis: data.baptismDate,
         tanggalKrisma: data.confirmationDate,
+        jenisKelamin: data.gender || Gender.MALE,
         keluarga: {
           connect: { id: user.keluargaId },
         },
@@ -357,10 +389,10 @@ export async function updateDependent(
     maritalStatus: StatusPernikahan;
     baptismDate?: Date | null;
     confirmationDate?: Date | null;
+    gender?: string | null;
   }
 ) {
   try {
-    console.log(data);
     // Update tanggungan
     await prisma.tanggungan.update({
       where: { id: dependentId },
@@ -374,6 +406,7 @@ export async function updateDependent(
         statusPernikahan: data.maritalStatus,
         tanggalBaptis: data.baptismDate,
         tanggalKrisma: data.confirmationDate,
+        jenisKelamin: data.gender || Gender.MALE,
       },
     });
 

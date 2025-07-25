@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,49 +11,50 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { CalendarIcon, Save, Loader2 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { id } from "date-fns/locale"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/popover";
+import { CalendarIcon, Save, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { Textarea } from "@/components/ui/textarea";
 
-import { 
-  SpouseFormValues, 
-  spouseFormSchema, 
-  Gender, 
+import {
+  SpouseFormValues,
+  spouseFormSchema,
+  Gender,
   Spouse,
   LivingStatus,
-  Religion
-} from "../types"
-import { formatDateForInput } from "../utils"
+  Religion,
+} from "../types";
+import { formatDateForInput } from "../utils";
 
 interface SpouseFormProps {
-  defaultValues?: Partial<SpouseFormValues>
-  onSubmit: (values: SpouseFormValues) => void
-  isSubmitting?: boolean
-  readOnly?: boolean
+  defaultValues?: Partial<SpouseFormValues>;
+  onSubmit: (values: SpouseFormValues) => void;
+  isSubmitting?: boolean;
+  readOnly?: boolean;
 }
 
-export function SpouseForm({ 
-  defaultValues, 
-  onSubmit, 
+export function SpouseForm({
+  defaultValues,
+  onSubmit,
   isSubmitting = false,
-  readOnly = false
+  readOnly = false,
 }: SpouseFormProps) {
+  console.log("SpouseForm rendered with defaultValues:", defaultValues);
   // Initialize form with default values or data from prop
   const form = useForm<SpouseFormValues>({
     resolver: zodResolver(spouseFormSchema),
@@ -75,18 +76,18 @@ export function SpouseForm({
       confirmationDate: null,
       deathDate: null,
       ...defaultValues,
-    }
-  })
+    },
+  });
 
   // Ambil status hidup/meninggal untuk kondisional rendering
-  const livingStatus = form.watch("livingStatus")
+  const livingStatus = form.watch("livingStatus");
   // Ambil agama untuk kondisional rendering
-  const religion = form.watch("religion")
+  const religion = form.watch("religion");
 
   // Form submission handler
   const handleSubmit = (values: SpouseFormValues) => {
-    onSubmit(values)
-  }
+    onSubmit(values);
+  };
 
   return (
     <Form {...form}>
@@ -237,7 +238,9 @@ export function SpouseForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value={Religion.CATHOLIC}>Katolik</SelectItem>
-                    <SelectItem value={Religion.PROTESTANT}>Protestan</SelectItem>
+                    <SelectItem value={Religion.PROTESTANT}>
+                      Protestan
+                    </SelectItem>
                     <SelectItem value={Religion.ISLAM}>Islam</SelectItem>
                     <SelectItem value={Religion.HINDU}>Hindu</SelectItem>
                     <SelectItem value={Religion.BUDDHA}>Buddha</SelectItem>
@@ -379,7 +382,9 @@ export function SpouseForm({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value={LivingStatus.ALIVE}>Hidup</SelectItem>
-                    <SelectItem value={LivingStatus.DECEASED}>Meninggal</SelectItem>
+                    <SelectItem value={LivingStatus.DECEASED}>
+                      Meninggal
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -410,7 +415,8 @@ export function SpouseForm({
           )}
 
           {/* Tanggal Baptis - hanya untuk Katolik/Protestan */}
-          {(religion === Religion.CATHOLIC || religion === Religion.PROTESTANT) && (
+          {(religion === Religion.CATHOLIC ||
+            religion === Religion.PROTESTANT) && (
             <FormField
               control={form.control}
               name="baptismDate"
@@ -561,9 +567,9 @@ export function SpouseForm({
 
         {/* Form actions */}
         <div className="flex justify-end pt-2">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || readOnly} 
+          <Button
+            type="submit"
+            disabled={isSubmitting || readOnly}
             className="w-full sm:w-auto"
             size="sm"
           >
@@ -582,5 +588,5 @@ export function SpouseForm({
         </div>
       </form>
     </Form>
-  )
-} 
+  );
+}

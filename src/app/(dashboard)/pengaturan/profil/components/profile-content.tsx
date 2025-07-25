@@ -32,6 +32,7 @@ import {
   DependentFormValues,
   Dependent,
   MaritalStatus,
+  Religion,
 } from "../types";
 
 import { getInitials } from "../utils/helpers";
@@ -455,7 +456,10 @@ export default function ProfileContent() {
 
               <div className="w-full">
                 <FamilyHeadForm
-                  defaultValues={profileData.familyHead}
+                  defaultValues={{
+                    ...profileData.familyHead,
+                    religion: profileData.familyHead.religion as Religion,
+                  }}
                   onSubmit={onFamilyHeadSubmit}
                   isSubmitting={isSaving}
                   readOnly={!roleAccess.canEdit}

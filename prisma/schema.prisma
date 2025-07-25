@@ -38,6 +38,7 @@ enum Role {
 model KeluargaUmat {
   id                       String           @id @default(uuid())
   namaKepalaKeluarga       String           @unique
+  jenisKelamin             String?           
   tanggalBergabung         DateTime
   tanggalKeluar            DateTime?
   alamat                   String
@@ -53,6 +54,11 @@ model KeluargaUmat {
   tanggalBaptis            DateTime?
   tanggalKrisma            DateTime?
   tanggalMeninggal         DateTime?
+  nik                      String?          @unique
+  pekerjaan                String? 
+  email                    String?          @unique
+  noBiduk                  String?          @unique
+  agama                    Agama            @default(KATOLIK)
   statusPernikahan         StatusPernikahan @default(TIDAK_MENIKAH)
   pasangan                 Pasangan?
   tanggungan               Tanggungan[]
@@ -81,14 +87,20 @@ enum StatusPernikahan {
 model Pasangan {
   id                 String          @id @default(uuid())
   nama               String
+  jenisKelamin       String?
   tempatLahir        String
   tanggalLahir       DateTime
   nomorTelepon       String?
   pendidikanTerakhir String
+  alamat             String?
   agama              Agama
   noBiduk            String?
+  kotaDomisili       String?
   tanggalBaptis      DateTime?
   tanggalKrisma      DateTime?
+  nik                String?           @unique 
+  email              String?          @unique
+  pekerjaan          String?
   status             StatusKehidupan @default(HIDUP)
   tanggalMeninggal   DateTime?
   keluarga           KeluargaUmat    @relation(fields: [keluargaId], references: [id])
@@ -100,6 +112,7 @@ model Tanggungan {
   id                 String           @id @default(uuid())
   jenisTanggungan    JenisTanggungan
   nama               String
+  jenisKelamin       String?
   tanggalLahir       DateTime
   tempatLahir        String
   pendidikanTerakhir String
