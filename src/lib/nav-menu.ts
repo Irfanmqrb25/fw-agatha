@@ -147,6 +147,14 @@ export const navMain: Record<string, MenuItem[]> = {
         { label: "Dana Mandiri", path: "/lingkungan/mandiri" },
       ],
     },
+    {
+      label: "IKATA",
+      icon: Banknote,
+      children: [
+        { label: "Kas IKATA", path: "/ikata/kas" },
+        { label: "Monitoring Penunggak", path: "/ikata/monitoring" },
+      ],
+    },
     { label: "Approval", path: "/approval", icon: ClipboardCheck },
     {
       label: "Kesekretariatan",
@@ -163,6 +171,14 @@ export const navMain: Record<string, MenuItem[]> = {
 
   WAKIL_BENDAHARA: [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+    {
+      label: "Lingkungan",
+      icon: Home,
+      children: [
+        { label: "Kas Lingkungan", path: "/lingkungan/kas" },
+        { label: "Dana Mandiri", path: "/lingkungan/mandiri" },
+      ],
+    },
     {
       label: "IKATA",
       icon: Banknote,
