@@ -625,52 +625,51 @@ export function FamilyHeadsTable({
             </TableBody>
           </Table>
         </div>
+      </div>
+      {/* Pagination */}
+      <div className="flex justify-center md:justify-end">
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={goToFirstPage}
+            disabled={currentPage === 1 || totalPages === 0}
+          >
+            <ChevronsLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1 || totalPages === 0}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        {/* Pagination */}
-        <div className="flex justify-center md:justify-end p-4">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={goToFirstPage}
-              disabled={currentPage === 1 || totalPages === 0}
-            >
-              <ChevronsLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1 || totalPages === 0}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+          <span className="px-1 text-sm font-medium">
+            Halaman {totalPages === 0 ? 0 : currentPage} dari {totalPages}
+          </span>
 
-            <span className="px-1 text-sm font-medium">
-              Halaman {totalPages === 0 ? 0 : currentPage} dari {totalPages}
-            </span>
-
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages || totalPages === 0}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              onClick={goToLastPage}
-              disabled={currentPage === totalPages || totalPages === 0}
-            >
-              <ChevronsRight className="h-4 w-4" />
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages || totalPages === 0}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-8 w-8"
+            onClick={goToLastPage}
+            disabled={currentPage === totalPages || totalPages === 0}
+          >
+            <ChevronsRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
