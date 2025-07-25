@@ -14,7 +14,12 @@ export default async function Page({
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Daftar Ulang Tahun</h1>
+      <div>
+        <h1 className="text-2xl font-semibold">Daftar Ulang Tahun</h1>
+        <p className="text-muted-foreground">
+          Lihat Daftar ulang tahun anggota St. Agatha setiap bulannya.
+        </p>
+      </div>
       <Suspense fallback={<SkeletonTable />}>
         <BirthdayTable
           initialData={await dataPromise}
