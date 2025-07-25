@@ -1,15 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { Birthday } from "../../types";
 
-export type BirthdayRow = {
-  nama: string;
-  kepalaKeluarga: string;
-  tanggalLahir: Date;
-  usia: string;
-};
-
-export const columns: ColumnDef<BirthdayRow>[] = [
+export const columns: ColumnDef<Birthday>[] = [
   {
     accessorKey: "nama",
     header: "Nama",

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 // Skeleton component (simple)
 function Skeleton({ className = "" }: { className?: string }) {
@@ -24,9 +25,11 @@ function Skeleton({ className = "" }: { className?: string }) {
 export function TableToolbar({
   onSearch,
   onFilterMonth,
+  mode,
 }: {
   onSearch: (query: string) => void;
   onFilterMonth: (month: number) => void;
+  mode?: "table" | "calendar";
 }) {
   const searchParams = useSearchParams();
   const [isLoadingMonth, setIsLoadingMonth] = useState(true);
@@ -49,18 +52,25 @@ export function TableToolbar({
   }, []);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 justify-between mb-4">
-      <Input
-        placeholder="Cari nama..."
-        value={search}
-        onChange={(e) => {
-          const value = e.target.value;
-          setSearch(value);
-          onSearch(value);
-        }}
-        className="max-w-sm"
-      />
-      <div className="w-[180px]">
+    <div
+      className={cn(
+        "flex flex-col sm:flex-row gap-4 mb-4",
+        mode === "table" ? "justify-between md:items-center" : "justify-start"
+      )}
+    >
+      {mode === "table" && (
+        <Input
+          placeholder="Cari nama..."
+          value={search}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSearch(value);
+            onSearch(value);
+          }}
+          className="max-w-sm border-pink-700 bg-white/30 backdrop-blur-sm focus:ring-pink-400 focus-visible:border-pink-700 focus-visible:ring-pink-300"
+        />
+      )}
+      <div className="w-[190px]">
         <Select
           value={isLoadingMonth ? "" : String(filterMonth)}
           onValueChange={(value) => {
@@ -70,7 +80,7 @@ export function TableToolbar({
           }}
           disabled={isLoadingMonth}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full border-pink-700 bg-white/30 backdrop-blur-sm focus:ring-pink-400">
             <SelectValue
               placeholder={isLoadingMonth ? <Skeleton /> : "Pilih Bulan"}
             />

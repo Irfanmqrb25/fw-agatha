@@ -139,6 +139,12 @@ const checkAccess = (path: string, role: string): boolean => {
 
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+
+  // ✅ Jangan proses file gambar
+  if (/\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(path)) {
+    return NextResponse.next();
+  }
+
   if (
     path.includes("/_next") ||
     path.startsWith("/api") ||

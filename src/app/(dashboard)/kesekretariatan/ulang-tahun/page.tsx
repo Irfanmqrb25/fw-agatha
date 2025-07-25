@@ -13,19 +13,32 @@ export default async function Page({
   const dataPromise = getBirthdays(defaultMonth);
 
   return (
-    <div className="p-6 space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold">Daftar Ulang Tahun</h1>
-        <p className="text-muted-foreground">
-          Lihat Daftar ulang tahun anggota St. Agatha setiap bulannya.
-        </p>
+    <div
+      className="relative min-h-screen w-full bg-cover bg-center"
+      style={{
+        backgroundImage: "url(/birthday-bg2.jpg)",
+        minHeight: "100vh",
+        position: "relative",
+      }}
+    >
+      {/* Overlay agar teks tetap terbaca */}
+      <div className="absolute" />
+
+      {/* Konten utama */}
+      <div className="relative z-10 p-6 space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-[#E5164D]">🎉 Ulang Tahun</h1>
+          <p className="text-[#D82D55] font-medium">
+            Lihat daftar ulang tahun anggota St. Agatha pada setiap bulannya.
+          </p>
+        </div>
+        <Suspense fallback={<SkeletonTable />}>
+          <BirthdayTable
+            initialData={await dataPromise}
+            initialMonth={defaultMonth}
+          />
+        </Suspense>
       </div>
-      <Suspense fallback={<SkeletonTable />}>
-        <BirthdayTable
-          initialData={await dataPromise}
-          initialMonth={defaultMonth}
-        />
-      </Suspense>
     </div>
   );
 }
