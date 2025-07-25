@@ -63,7 +63,13 @@ export function UmatProfileContent({
       className="w-full"
       onValueChange={setActiveTab}
     >
-      <TabsList className="grid w-full grid-cols-3 h-auto">
+      <TabsList
+        className={`grid w-full h-auto ${
+          profileData.familyHead.maritalStatus === MaritalStatus.MARRIED
+            ? "grid-cols-3"
+            : "grid-cols-2"
+        }`}
+      >
         <TabsTrigger
           value="kepala-keluarga"
           className="py-2 text-xs sm:text-sm data-[state=active]:font-medium"
