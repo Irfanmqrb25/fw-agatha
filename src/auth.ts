@@ -1,4 +1,6 @@
-import NextAuth from "next-auth"
+import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
-export const { auth } = NextAuth(authOptions)
+export function auth() {
+  return getServerSession(authOptions)
+}
