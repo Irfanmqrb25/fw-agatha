@@ -83,6 +83,7 @@ const routeAccessMap: { [key: string]: string[] } = {
     "UMAT",
   ],
   "/kesekretariatan/ulang-tahun": [
+    "SUPER_USER",
     "KETUA",
     "WAKIL_KETUA",
     "SEKRETARIS",
@@ -153,11 +154,11 @@ const checkAccess = (path: string, role: string): boolean => {
   }
 
   const pathSegments = path.split("/").filter(Boolean);
-  let currentPath = "";
-  for (let i = 0; i < pathSegments.length; i++) {
-    currentPath = `/${pathSegments.slice(0, i + 1).join("/")}`;
-    if (routeAccessMap[currentPath]) {
-      return routeAccessMap[currentPath].includes(role);
+  // Cek dari path paling spesifik ke paling umum
+  for (let i = pathSegments.length; i > 0; i--) {
+    const currentPath = `/${pathSegments.slice(0, i).join("/")}`;
+    if (routeAccessMap[currentPath] && routeAccessMap[currentPath].includes(role)) {
+      return true;
     }
   }
   return false;
@@ -168,6 +169,7 @@ export async function middleware(request: NextRequest) {
   if (path !== "/" && path.endsWith("/")) {
     path = path.replace(/\/$/, "");
   }
+
   // ✅ Jangan proses file gambar
   if (/\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(path)) {
     return NextResponse.next();
@@ -201,14 +203,13 @@ export async function middleware(request: NextRequest) {
       if (token?.role) {
         return NextResponse.redirect(new URL("/dashboard", request.url));
       }
-    } catch (error) {
+    } catch {
       return NextResponse.next();
     }
 
     return NextResponse.next();
   }
 
-  // Ambil session NextAuth.js
   try {
     const token = await getToken({
       req: request,
@@ -222,10 +223,13 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
+    // Debug log, bisa dihapus setelah yakin berfungsi
+    console.log("Middleware checking access:", { path, userRole, access: checkAccess(path, userRole) });
+
     if (!checkAccess(path, userRole)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-  } catch (error) {
+  } catch {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
