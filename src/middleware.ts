@@ -100,6 +100,8 @@ export async function middleware(request: NextRequest) {
     const hasAccess = checkAccess(path, userRole);
 
     // 🔍 Debug log
+    console.log("🪪 Token di middleware:", token);
+    console.log("🧑 Role:", token?.role);
     console.log("🔍 [MIDDLEWARE ACCESS CHECK]");
     console.log("→ Path:", path);
     console.log("→ Role:", userRole);
