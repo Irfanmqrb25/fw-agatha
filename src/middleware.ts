@@ -20,8 +20,20 @@ const routeAccessMap: { [key: string]: string[] } = {
     "BENDAHARA",
     "WAKIL_BENDAHARA",
   ],
-  "/lingkungan/kas": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "BENDAHARA"],
-  "/lingkungan/mandiri": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "BENDAHARA"],
+  "/lingkungan/kas": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/lingkungan/mandiri": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
   "/ikata": [
     "SUPER_USER",
     "KETUA",
