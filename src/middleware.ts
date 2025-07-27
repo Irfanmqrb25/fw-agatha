@@ -3,27 +3,142 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const routeAccessMap: { [key: string]: string[] } = {
-  "/dashboard": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
-  "/lingkungan": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/lingkungan/kas": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/lingkungan/mandiri": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/ikata": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/ikata/kas": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/ikata/monitoring": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/kesekretariatan": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
-  "/kesekretariatan/umat": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS"],
-  "/kesekretariatan/doling": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS"],
-  "/kesekretariatan/kaleidoskop": ["SUPER_USER", "SEKRETARIS", "WAKIL_SEKRETARIS"],
-  "/kesekretariatan/agenda": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
-  "/kesekretariatan/ulang-tahun": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA"],
-  "/publikasi": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
-  "/approval": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/dashboard": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
+  "/lingkungan": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/lingkungan/kas": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/lingkungan/mandiri": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/ikata": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/ikata/kas": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/ikata/monitoring": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/kesekretariatan": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
+  "/kesekretariatan/umat": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+  ],
+  "/kesekretariatan/doling": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+  ],
+  "/kesekretariatan/kaleidoskop": [
+    "SUPER_USER",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+  ],
+  "/kesekretariatan/agenda": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
+  "/kesekretariatan/ulang-tahun": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
+  "/publikasi": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
+  "/approval": [
+    "SUPER_USER",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+  ],
   "/histori-pembayaran": ["SUPER_USER", "UMAT"],
-  "/pengaturan": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
+  "/pengaturan": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
   "/pengaturan/profil": ["SUPER_USER", "UMAT"],
-  "/pengaturan/password": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
+  "/pengaturan/password": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
   "/pengaturan/wipe": ["SUPER_USER"],
-  "/notifications": ["SUPER_USER", "KETUA", "WAKIL_KETUA", "SEKRETARIS", "WAKIL_SEKRETARIS", "BENDAHARA", "WAKIL_BENDAHARA", "UMAT"],
+  "/notifications": [
+    "SUPER_USER",
+    "KETUA",
+    "WAKIL_KETUA",
+    "SEKRETARIS",
+    "WAKIL_SEKRETARIS",
+    "BENDAHARA",
+    "WAKIL_BENDAHARA",
+    "UMAT",
+  ],
 };
 
 const checkAccess = (path: string, role: string): boolean => {
@@ -33,18 +148,19 @@ const checkAccess = (path: string, role: string): boolean => {
     return routeAccessMap[path].includes(role);
   }
 
+  // Khusus untuk halaman detail notifikasi (/notifications/[id])
   if (path.startsWith("/notifications/")) {
     return routeAccessMap["/notifications"]?.includes(role) || false;
   }
 
   const pathSegments = path.split("/").filter(Boolean);
-  for (let i = pathSegments.length; i > 0; i--) {
-    const currentPath = `/${pathSegments.slice(0, i).join("/")}`;
-    if (routeAccessMap[currentPath] && routeAccessMap[currentPath].includes(role)) {
-      return true;
+  let currentPath = "";
+  for (let i = 0; i < pathSegments.length; i++) {
+    currentPath = `/${pathSegments.slice(0, i + 1).join("/")}`;
+    if (routeAccessMap[currentPath]) {
+      return routeAccessMap[currentPath].includes(role);
     }
   }
-
   return false;
 };
 
@@ -53,14 +169,16 @@ export async function middleware(request: NextRequest) {
   if (path !== "/" && path.endsWith("/")) {
     path = path.replace(/\/$/, "");
   }
+  // ✅ Jangan proses file gambar
+  if (/\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(path)) {
+    return NextResponse.next();
+  }
 
-  // Lewati static files
   if (
     path.includes("/_next") ||
     path.startsWith("/api") ||
     path.includes("/static") ||
-    path === "/" ||
-    /\.(jpg|jpeg|png|gif|svg|webp|ico)$/i.test(path)
+    path === "/"
   ) {
     return NextResponse.next();
   }
@@ -74,20 +192,24 @@ export async function middleware(request: NextRequest) {
   ];
 
   if (publicRoutes.includes(path)) {
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: false,
-    });
+    try {
+      const token = await getToken({
+        req: request,
+        secret: process.env.NEXTAUTH_SECRET,
+        secureCookie: false,
+      });
 
-    if (token?.role) {
-      console.log("🔐 Logged in user accessing public route, redirecting to dashboard");
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      if (token?.role) {
+        return NextResponse.redirect(new URL("/dashboard", request.url));
+      }
+    } catch (error) {
+      return NextResponse.next();
     }
 
     return NextResponse.next();
   }
 
+  // Ambil session NextAuth.js
   try {
     const token = await getToken({
       req: request,
@@ -95,25 +217,16 @@ export async function middleware(request: NextRequest) {
       secureCookie: false,
     });
 
-    const userRole = token?.role || "UNKNOWN";
+    const userRole = token?.role as string | undefined;
 
-    const hasAccess = checkAccess(path, userRole);
+    if (!userRole) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
 
-    // 🔍 Debug log
-    console.log("🪪 Token di middleware:", token);
-    console.log("🧑 Role:", token?.role);
-    console.log("🔍 [MIDDLEWARE ACCESS CHECK]");
-    console.log("→ Path:", path);
-    console.log("→ Role:", userRole);
-    console.log("→ Allowed Roles:", routeAccessMap[path] || "Not explicitly defined");
-    console.log("→ Access Result:", hasAccess);
-
-    if (!hasAccess) {
-      console.warn("⛔ ACCESS DENIED:", { path, userRole });
+    if (!checkAccess(path, userRole)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-  } catch (err) {
-    console.error("❌ Middleware error:", err);
+  } catch (error) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
