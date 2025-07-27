@@ -63,7 +63,8 @@ export function KasIKATAContent({
 
   // Role definition
   const isAdmin = userRole === "SUPER_USER" || userRole === "KETUA";
-  const isTreasurer = userRole === "WAKIL_BENDAHARA";
+  const isTreasurer =
+    userRole === "WAKIL_BENDAHARA" || userRole === "BENDAHARA";
   const canModifyData = isAdmin || isTreasurer;
   const hasAccess =
     userRole &&
