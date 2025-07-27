@@ -66,6 +66,7 @@ export const navMain: Record<string, MenuItem[]> = {
         { label: "Data Umat", path: "/kesekretariatan/umat" },
         { label: "Doa Lingkungan", path: "/kesekretariatan/doling" },
         { label: "Agenda", path: "/kesekretariatan/agenda" },
+        { label: "Ulang Tahun", path: "/kesekretariatan/ulang-tahun" },
       ],
     },
     { label: "Publikasi", path: "/publikasi", icon: FileText },
@@ -85,6 +86,7 @@ export const navMain: Record<string, MenuItem[]> = {
         { label: "Data Umat", path: "/kesekretariatan/umat" },
         { label: "Doa Lingkungan", path: "/kesekretariatan/doling" },
         { label: "Agenda", path: "/kesekretariatan/agenda" },
+        { label: "Ulang Tahun", path: "/kesekretariatan/ulang-tahun" },
       ],
     },
     { label: "Publikasi", path: "/publikasi", icon: FileText },
@@ -159,7 +161,10 @@ export const navMain: Record<string, MenuItem[]> = {
     {
       label: "Kesekretariatan",
       icon: Users,
-      children: [{ label: "Agenda", path: "/kesekretariatan/agenda" }],
+      children: [
+        { label: "Agenda", path: "/kesekretariatan/agenda" },
+        { label: "Ulang Tahun", path: "/kesekretariatan/ulang-tahun" },
+      ],  
     },
     { label: "Publikasi", path: "/publikasi", icon: FileText },
     {
@@ -187,10 +192,14 @@ export const navMain: Record<string, MenuItem[]> = {
         { label: "Monitoring Penunggak", path: "/ikata/monitoring" },
       ],
     },
+    { label: "Approval", path: "/approval", icon: ClipboardCheck },
     {
       label: "Kesekretariatan",
       icon: Users,
-      children: [{ label: "Agenda", path: "/kesekretariatan/agenda" }],
+      children: [
+        { label: "Agenda", path: "/kesekretariatan/agenda" },
+        { label: "Ulang Tahun", path: "/kesekretariatan/ulang-tahun" },
+      ],         
     },
     { label: "Publikasi", path: "/publikasi", icon: FileText },
     {
