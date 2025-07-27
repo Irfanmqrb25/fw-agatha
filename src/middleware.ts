@@ -13,36 +13,12 @@ const routeAccessMap: { [key: string]: string[] } = {
     "WAKIL_BENDAHARA",
     "UMAT",
   ],
-  "/lingkungan": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
-  "/lingkungan/kas": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
-  "/lingkungan/mandiri": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
-  "/ikata": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
-  "/ikata/kas": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
-  "/ikata/monitoring": [
-    "SUPER_USER",
-    "BENDAHARA",
-    "WAKIL_BENDAHARA",
-  ],
+  "/lingkungan": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/lingkungan/kas": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/lingkungan/mandiri": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/ikata": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/ikata/kas": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
+  "/ikata/monitoring": ["SUPER_USER", "BENDAHARA", "WAKIL_BENDAHARA"],
   "/kesekretariatan": [
     "SUPER_USER",
     "KETUA",
