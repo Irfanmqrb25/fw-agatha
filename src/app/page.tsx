@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic" // <- ini
-
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 
