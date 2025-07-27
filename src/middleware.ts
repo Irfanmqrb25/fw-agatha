@@ -102,7 +102,7 @@ const routeAccessMap: { [key: string]: string[] } = {
   ],
   "/approval": [
     "SUPER_USER",
-    "BENDAHARA"],
+    "BENDAHARA",
     "WAKIL_BENDAHARA",
   ],
   "/histori-pembayaran": ["SUPER_USER", "UMAT"],
